@@ -413,7 +413,12 @@
             display: block !important;
             width: 100% !important;
         }
-
+        
+        /* CSS untuk menyembunyikan hasil pencarian sebelum ada input */
+        .gsc-control-cse .gsc-results {
+            display: none;
+        }
+        
         /* Media Queries untuk Responsif */
         @media (max-width: 768px) {
             .dashboard {
@@ -508,6 +513,7 @@
 
             <div class="container">
                 <section id="search-results-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <div class="gcse-searchresults-only"></div>
                 </section>
 
@@ -917,7 +923,7 @@
                         <li><i class="fas fa-link"></i> <a href="https://www.unicef.org/indonesia" target="_blank">UNICEF Indonesia</a><p>Informasi dan laporan tentang kesejahteraan, pendidikan, dan kesehatan anak dan remaja di Indonesia.</p></li>
                     </ul>
                 </section>
-
+                
                 <div class="controls">
                     <button onclick="updateData()">Update Data (Simulasi 2024)</button>
                     <button onclick="resetData()">Reset Data</button>
@@ -933,7 +939,8 @@
             { year: 2020, percentage: 70, factor: 'Pandemi COVID-19 (kurang motivasi)', solution: 'Program online ibadah virtual' },
             { year: 2021, percentage: 60, factor: 'Kenaikan penggunaan TikTok/Instagram', solution: 'Batasan screen time & reminder app' },
             { year: 2022, percentage: 50, factor: 'Tekanan ujian sekolah & ekstrakurikuler', solution: 'Integrasi ibadah ke jadwal harian' },
-            { year: 2023, percentage: 45, factor: 'Influence budaya pop & peer pressure', solution: 'Konseling remaja di masjid/gereja' }
+            { year: 2023, percentage: 45, factor: 'Influence budaya pop & peer pressure', solution: 'Konseling remaja di masjid/gereja' },
+            { year: 2024, percentage: 40, factor: 'AI & Metaverse distraction', solution: 'Workshop digital detox untuk remaja' }
         ];
 
         const originalDatabase = JSON.parse(JSON.stringify(database)); // Salinan data asli untuk reset
@@ -964,19 +971,10 @@
 
         // Fungsi untuk mengupdate data ke simulasi 2024
         function updateData() {
-            const year2024Exists = database.some(item => item.year === 2024);
-
-            if (!year2024Exists) {
-                // Tambahkan data 2024 ke "database"
-                const newData = {
-                    year: 2024,
-                    percentage: 40,
-                    factor: 'AI & Metaverse distraction',
-                    solution: 'Workshop digital detox untuk remaja'
-                };
-                database.push(newData);
-            }
-
+            // Data 2024 sudah ada di database awal, jadi fungsi ini tidak perlu menambahkannya lagi.
+            // Bisa digunakan untuk simulasi data di masa depan.
+            // Saat ini, fungsi ini hanya mengupdate tampilan saja.
+            
             // Perbarui chart
             myChart.data.labels = database.map(item => item.year);
             myChart.data.datasets[0].data = database.map(item => item.percentage);
@@ -1061,6 +1059,7 @@
                 sec.style.display = 'none';
             });
             noResultsMessage.style.display = 'none';
+            document.getElementById('search-results-section').style.display = 'none'; // Sembunyikan juga hasil pencarian
 
             // Tampilkan section yang dipilih
             document.getElementById(`${section}-section`).style.display = 'block';
@@ -1072,6 +1071,40 @@
                 renderTable();
             }
         }
+        
+        // Fungsi untuk menampilkan hasil pencarian Google
+        function showGoogleSearchResults() {
+            // Sembunyikan semua section lain
+            allSections.forEach(sec => {
+                sec.style.display = 'none';
+            });
+            // Tampilkan section hasil pencarian
+            document.getElementById('search-results-section').style.display = 'block';
+        }
+
+        // Fungsi untuk mendeteksi perubahan pada search box Google
+        window.onload = function() {
+            // Perbaikan agar search box tidak langsung menampilkan hasil kosong
+            const searchBox = document.querySelector('.gsc-input');
+            const searchResultsDiv = document.querySelector('.gsc-control-cse .gsc-results');
+            
+            if (searchBox) {
+                searchBox.addEventListener('keyup', (event) => {
+                    // Cek apakah user telah mengetik sesuatu
+                    if (event.target.value.length > 0) {
+                        showGoogleSearchResults();
+                        if (searchResultsDiv) {
+                           searchResultsDiv.style.display = 'block';
+                        }
+                    } else {
+                        showSection('home');
+                        if (searchResultsDiv) {
+                           searchResultsDiv.style.display = 'none';
+                        }
+                    }
+                });
+            }
+        };
 
         // Fungsi untuk menampilkan notifikasi pop-up (toast)
         function showToast(message) {
