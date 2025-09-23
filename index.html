@@ -14,11 +14,15 @@
             --text-color: #333;
             --accent-color: #3498db;
             --hover-color: #2980b9;
+            --checklist-green: #2ecc71;
+            --checklist-red: #e74c3c;
         }
         [data-theme="dark"] {
             --bg-color: #2c3e50;
             --container-bg: #34495e;
             --text-color: #ecf0f1;
+            --checklist-green: #27ae60;
+            --checklist-red: #c0392b;
         }
 
         /* Gaya Dasar */
@@ -160,9 +164,9 @@
         }
         .theme-toggle {
             position: fixed;
-            bottom: 20px; /* Perubahan di sini */
-            left: 50%; /* Perubahan di sini */
-            transform: translateX(-50%); /* Perubahan di sini */
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 1000;
         }
         .back-button {
@@ -185,6 +189,37 @@
         }
         .audio-btn:hover {
             color: var(--hover-color);
+        }
+
+        /* Header dan Pencarian Baru */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .search-bar {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 5px 10px;
+            background: var(--container-bg);
+            transition: border-color 0.3s;
+        }
+        .search-bar:focus-within {
+            border-color: var(--accent-color);
+        }
+        .search-bar input {
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--text-color);
+            padding: 5px;
+        }
+        .search-bar i {
+            color: var(--text-color);
+            margin-right: 5px;
         }
 
         /* Notifikasi Toast */
@@ -332,6 +367,21 @@
             cursor: pointer;
             transform: scale(1.2);
         }
+        /* Penambahan untuk warna checklist */
+        .checklist-table td {
+            background-color: var(--checklist-red);
+            transition: background-color 0.3s;
+        }
+        .checklist-table td.checked {
+            background-color: var(--checklist-green);
+        }
+
+        #no-results {
+            text-align: center;
+            font-size: 1.2em;
+            color: #e74c3c;
+            display: none;
+        }
         
         /* Media Queries untuk Responsif */
         @media (max-width: 768px) {
@@ -347,7 +397,7 @@
                 border-radius: 0 0 10px 10px;
             }
             .sidebar h2 {
-                display: none; /* Sembunyikan judul "Dashboard" di HP */
+                display: none;
             }
             .sidebar ul {
                 display: flex;
@@ -379,6 +429,11 @@
             }
             .checklist-table th, .checklist-table td {
                 padding: 4px;
+            }
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
             }
         }
     </style>
@@ -412,9 +467,17 @@
         </nav>
 
         <main class="main-content">
+            <div class="header-container">
+                <h1 style="margin: 0;">Dashboard</h1>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Cari..." oninput="searchContent()">
+                </div>
+            </div>
+            
+            <p id="no-results">Tidak ada hasil yang ditemukan.</p>
+
             <div class="container">
-                <h1>Data Penurunan Ibadah di Kalangan Anak Remaja</h1>
-                
                 <section id="home-section" style="display: block;">
                     <h2>Selamat Datang di Dashboard</h2>
                     <p style="text-align: center;">Dashboard ini menyajikan data hipotetis mengenai tren penurunan ibadah di kalangan remaja. Data ini bersifat edukatif dan terinspirasi dari riset global. Gunakan navigasi di samping untuk menjelajahi statistik, trik, doa, dan hadis.</p>
@@ -600,7 +663,7 @@
                         <p class="arab">رَبَّنَا لَكَ الْحَمْدُ مِلْءَ السَّمَاوَاتِ وَمِلْءَ الأَرْضِ وَمِلْءَ مَا شِئْتَ مِنْ شَيْءٍ بَعْدُ</p>
                         <p class="transliterasi">"Rabbana lakal hamdu mil'us-samawati wa mil'ul-ardhi wa mil'a ma syi'ta min syai'in ba'du."</p>
                         <p>Artinya: "Ya Tuhan kami, hanya bagi-Mu segala puji, sepenuh langit, sepenuh bumi, dan sepenuh apa saja yang Engkau kehendaki sesudah itu."</p>
-                        <audio id="itidalAudio" src="URL_AUDIO_I_TIDAL.mp3"></audio>
+                        <audio id="itidalAudio" src="URL_AUDIO_I_TIDAL.mpu"></audio>
                     </div>
                     <div class="list-item">
                         <h4>Sujud<button class="audio-btn" onclick="playAudio('sujudAudio')"><i class="fas fa-play"></i></button></h4>
@@ -841,6 +904,8 @@
         ];
 
         const originalDatabase = JSON.parse(JSON.stringify(database)); // Salinan data asli untuk reset
+        const allSections = document.querySelectorAll('main .container section');
+        const noResultsMessage = document.getElementById('no-results');
 
         // Inisialisasi Chart.js
         const ctx = document.getElementById('myChart').getContext('2d');
@@ -958,19 +1023,12 @@
         
         // Fungsi untuk menampilkan bagian dashboard yang berbeda
         function showSection(section) {
+            document.getElementById('searchInput').value = '';
             // Sembunyikan semua section
-            document.getElementById('home-section').style.display = 'none';
-            document.getElementById('stats-section').style.display = 'none';
-            document.getElementById('chart-section').style.display = 'none';
-            document.getElementById('table-section').style.display = 'none';
-            document.getElementById('checklist-section').style.display = 'none';
-            document.getElementById('tips-section').style.display = 'none';
-            document.getElementById('doa-section').style.display = 'none';
-            document.getElementById('wudhu-section').style.display = 'none';
-            document.getElementById('gerakan-sholat-section').style.display = 'none';
-            document.getElementById('hadis-section').style.display = 'none';
-            document.getElementById('profile-section').style.display = 'none';
-            document.getElementById('web-section').style.display = 'none';
+            allSections.forEach(sec => {
+                sec.style.display = 'none';
+            });
+            noResultsMessage.style.display = 'none';
 
             // Tampilkan section yang dipilih
             document.getElementById(`${section}-section`).style.display = 'block';
@@ -980,6 +1038,36 @@
                 loadChecklist();
             } else if (section === 'table') {
                 renderTable();
+            }
+        }
+
+        // Fungsi untuk mencari konten di seluruh dashboard
+        function searchContent() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            let hasResults = false;
+
+            allSections.forEach(sec => {
+                if (sec.id === 'home-section') {
+                    sec.style.display = 'none';
+                    return; // Jangan tampilkan section home saat mencari
+                }
+
+                const sectionContent = sec.textContent.toLowerCase();
+                if (sectionContent.includes(query)) {
+                    sec.style.display = 'block';
+                    hasResults = true;
+                } else {
+                    sec.style.display = 'none';
+                }
+            });
+
+            if (query === '') {
+                showSection('home');
+                noResultsMessage.style.display = 'none';
+            } else if (!hasResults) {
+                noResultsMessage.style.display = 'block';
+            } else {
+                noResultsMessage.style.display = 'none';
             }
         }
 
@@ -1043,7 +1131,18 @@
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.id = `${sholat.toLowerCase()}-day-${i}`;
-                    checkbox.addEventListener('change', saveChecklist);
+                    
+                    // Tambahkan event listener untuk mengubah warna sel
+                    checkbox.addEventListener('change', (event) => {
+                        const parentCell = event.target.closest('td');
+                        if (event.target.checked) {
+                            parentCell.classList.add('checked');
+                        } else {
+                            parentCell.classList.remove('checked');
+                        }
+                        saveChecklist();
+                    });
+                    
                     cell.appendChild(checkbox);
                     row.appendChild(cell);
                 }
@@ -1072,7 +1171,11 @@
                     for (let i = 1; i <= 40; i++) {
                         const checkbox = document.getElementById(`${sholat.toLowerCase()}-day-${i}`);
                         if (checkbox && checklistData[sholat.toLowerCase()][i]) {
-                            checkbox.checked = checklistData[sholat.toLowerCase()][i];
+                            checkbox.checked = true;
+                            checkbox.closest('td').classList.add('checked');
+                        } else if (checkbox) {
+                            checkbox.checked = false;
+                            checkbox.closest('td').classList.remove('checked');
                         }
                     }
                 });
@@ -1084,6 +1187,7 @@
                 localStorage.removeItem(storageKey);
                 document.querySelectorAll('.checklist-table input[type="checkbox"]').forEach(checkbox => {
                     checkbox.checked = false;
+                    checkbox.closest('td').classList.remove('checked');
                 });
                 showToast('Checklist berhasil direset!');
             }
@@ -1101,3 +1205,4 @@
     </script>
 </body>
 </html>
+
