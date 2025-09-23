@@ -160,8 +160,9 @@
         }
         .theme-toggle {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            bottom: 20px; /* Perubahan di sini */
+            left: 50%; /* Perubahan di sini */
+            transform: translateX(-50%); /* Perubahan di sini */
             z-index: 1000;
         }
         .back-button {
@@ -337,7 +338,6 @@
             .dashboard {
                 flex-direction: column;
             }
-            /* PERUBAHAN DI SINI UNTUK MENU DI ATAS */
             .sidebar {
                 width: 100%;
                 order: 1;
