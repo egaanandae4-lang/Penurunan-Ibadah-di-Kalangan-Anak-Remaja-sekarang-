@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard: Data Penurunan Ibadah Anak Remaja Zaman Sekarang</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Variabel Warna */
+        :root {
+            --bg-color: #f4f4f4;
+            --container-bg: white;
+            --text-color: #333;
+            --accent-color: #3498db;
+            --hover-color: #2980b9;
+        }
+        [data-theme="dark"] {
+            --bg-color: #2c3e50;
+            --container-bg: #34495e;
+            --text-color: #ecf0f1;
+        }
+
+        /* Gaya Dasar */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 200px;
+            background: var(--accent-color);
+            padding: 20px;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .sidebar h2 {
+            margin-top: 0;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar li {
+            margin: 10px 0;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .sidebar li:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .container {
+            background: var(--container-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+        h1, h2 {
+            text-align: center;
+            color: var(--accent-color);
+        }
+        
+        /* Statistik */
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .stat-box {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            flex: 1;
+            margin: 10px;
+            min-width: 200px;
+            transition: background-color 0.3s;
+        }
+        [data-theme="dark"] .stat-box {
+            background: #34495e;
+        }
+        .stat-box i {
+            font-size: 2em;
+            color: var(--accent-color);
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #ddd;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #e74c3c;
+            transition: width 0.5s;
+        }
+
+        /* Tabel & Grafik */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+        .filter-select {
+            margin: 10px;
+            padding: 5px;
+        }
+
+        /* Tombol & Kontrol */
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        button {
+            background: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: var(--hover-color);
+        }
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .back-button {
+            background: none;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            display: inline-block;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .audio-btn {
+            background: none;
+            color: var(--accent-color);
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin-left: 10px;
+        }
+        .audio-btn:hover {
+            color: var(--hover-color);
+        }
+
+        /* Notifikasi Toast */
+        #toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+            z-index: 1001;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein {
+            from { right: 0; opacity: 0; }
+            to { right: 20px; opacity: 1; }
+        }
+        @keyframes fadeout {
+            from { right: 20px; opacity: 1; }
+            to { right: 0; opacity: 0; }
+        }
+
+        /* Profil & Unggah Foto */
+        input[type="file"] {
+            display: none;
+        }
+        .custom-file-upload {
+            border: 1px solid var(--accent-color);
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .custom-file-upload:hover {
+            background: var(--hover-color);
+        }
+        #profile-picture {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            border: 3px solid var(--accent-color);
+        }
+
+        /* Daftar Web, Tips, Doa, Hadis */
+        .list-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .list-item h4 {
+            margin-top: 0;
+            color: var(--accent-color);
+        }
+        .list-item p {
+            margin: 5px 0 0;
+        }
+        .list-item a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: bold;
+        }
+        .arab {
+            font-family: 'Amiri', 'Traditional Arabic', serif;
+            font-size: 1.5em;
+            text-align: right;
+            direction: rtl;
+        }
+        .transliterasi {
+            font-style: italic;
+            font-size: 1.2em;
+        }
+        .doa-group {
+            padding-left: 20px;
+        }
+        
+        .gerakan-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .gerakan-step img {
+            width: 120px;
+            height: auto;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .gerakan-desc {
+            flex: 1;
+        }
+        .gerakan-desc h4 {
+            margin-top: 0;
+            color: var(--accent-color);
+        }
+
+        /* Gaya Checklist Sholat 40 Hari */
+        .checklist-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        .checklist-table th, .checklist-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .checklist-table th {
+            background-color: var(--accent-color);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .checklist-table td:first-child {
+            font-weight: bold;
+            text-align: left;
+            position: sticky;
+            left: 0;
+            background-color: var(--container-bg);
+            z-index: 2;
+        }
+        .checklist-table td:first-child:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-right: 1px solid #ddd;
+            z-index: -1;
+        }
+        .checklist-table tr:hover {
+            background-color: #f1f1f1;
+        }
+        [data-theme="dark"] .checklist-table td:first-child {
+            background-color: var(--container-bg);
+        }
+        .checklist-table input[type="checkbox"] {
+            cursor: pointer;
+            transform: scale(1.2);
+        }
+        
+        /* Media Queries untuk Responsif */
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                order: 2;
+            }
+            .stats {
+                flex-direction: column;
+            }
+            .gerakan-step {
+                flex-direction: column;
+                align-items: center;
+            }
+            .checklist-table th, .checklist-table td {
+                padding: 4px;
+            }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="theme-toggle">
+        <button onclick="toggleTheme()"><i class="fas fa-moon"></i> Dark Mode</button>
+    </div>
+    <div id="toast"></div>
+
+    <div class="dashboard">
+        <nav class="sidebar">
+            <h2><i class="fas fa-chart-line"></i> Dashboard</h2>
+            <ul>
+                <li onclick="showSection('home')"><i class="fas fa-home"></i> Beranda</li>
+                <li onclick="showSection('stats')"><i class="fas fa-chart-bar"></i> Statistik</li>
+                <li onclick="showSection('chart')"><i class="fas fa-chart-line"></i> Grafik</li>
+                <li onclick="showSection('table')"><i class="fas fa-table"></i> Tabel Data</li>
+                <li onclick="showSection('checklist')"><i class="fas fa-clipboard-check"></i> Checklist 40 Hari</li>
+                <li onclick="showSection('tips')"><i class="fas fa-lightbulb"></i> Trik & Tips</li>
+                <li onclick="showSection('doa')"><i class="fas fa-pray"></i> Doa & Bacaan Sholat</li>
+                <li onclick="showSection('gerakan-sholat')"><i class="fas fa-mosque"></i> Gerakan Sholat</li>
+                <li onclick="showSection('wudhu')"><i class="fas fa-hand-holding-water"></i> Wudhu</li>
+                <li onclick="showSection('hadis')"><i class="fas fa-book-open"></i> Hadis</li>
+                <li onclick="showSection('profile')"><i class="fas fa-user-circle"></i> Profil</li>
+                <li onclick="showSection('web')"><i class="fas fa-globe"></i> Web</li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <div class="container">
+                <h1>Data Penurunan Ibadah di Kalangan Anak Remaja</h1>
+                
+                <section id="home-section" style="display: block;">
+                    <h2>Selamat Datang di Dashboard</h2>
+                    <p style="text-align: center;">Dashboard ini menyajikan data hipotetis mengenai tren penurunan ibadah di kalangan remaja. Data ini bersifat edukatif dan terinspirasi dari riset global. Gunakan navigasi di samping untuk menjelajahi statistik, trik, doa, dan hadis.</p>
+                    
+                    <div class="container" style="margin-top: 20px;">
+                        <h3><i class="fas fa-bullhorn"></i> Informasi Terbaru</h3>
+                        <ul style="list-style-type: none; padding: 0;">
+                            <li style="margin-bottom: 10px;"><i class="fas fa-circle-check" style="color: #27ae60;"></i> Data 2024 berhasil ditambahkan. Grafik dan tabel telah diperbarui!</li>
+                            <li style="margin-bottom: 10px;"><i class="fas fa-circle-check" style="color: #27ae60;"></i> Fitur Dark Mode kini tersedia untuk kenyamanan Anda.</li>
+                            <li style="margin-bottom: 10px;"><i class="fas fa-circle-check" style="color: #27ae60;"></i> Fitur **Checklist Sholat 40 Hari** telah ditambahkan. Ayo mulai konsisten!</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="stats-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2>Statistik Penurunan Ibadah</h2>
+                    <div class="stats">
+                        <div class="stat-box">
+                            <i class="fas fa-arrow-down"></i>
+                            <h3>Penurunan 2020-2024</h3>
+                            <p id="penurunan">25% (dari 70% ke 45% rutin sholat/ibadah)</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-penurunan" style="width: 45%;"></div>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <i class="fas fa-mobile-alt"></i>
+                            <h3>Faktor Utama</h3>
+                            <p id="faktor">Sosmed (60%), Sibuk Belajar (30%)</p>
+                        </div>
+                        <div class="stat-box">
+                            <i class="fas fa-lightbulb"></i>
+                            <h3>Rekomendasi</h3>
+                            <p>Edukasi Digital & Program Remaja Online</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="chart-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2>Grafik Tren Penurunan</h2>
+                    <div class="controls">
+                        <label>Filter Tahun: </label>
+                        <select class="filter-select" id="yearFilter" onchange="filterChart()">
+                            <option value="all">Semua Tahun</option>
+                            <option value="2020-2022">2020-2022</option>
+                            <option value="2022-2024">2022-2024</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                </section>
+
+                <section id="table-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2>Tabel Data Detail</h2>
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Tahun</th>
+                                <th>Persentase Remaja Rutin Ibadah (%)</th>
+                                <th>Faktor Penyebab Penurunan</th>
+                                <th>Saran Solusi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </section>
+
+                <section id="checklist-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2>Checklist Sholat Fardhu 40 Hari</h2>
+                    <p style="text-align: center;">Tantang dirimu untuk sholat 5 waktu selama 40 hari tanpa terlewat. Ini adalah langkah awal yang luar biasa untuk menguatkan ibadahmu. </p>
+                    <div style="overflow-x: auto;">
+                        <table class="checklist-table">
+                            <thead>
+                                <tr>
+                                    <th>Sholat</th>
+                                    <script>
+                                        for (let i = 1; i <= 40; i++) {
+                                            document.write(`<th>Hari ${i}</th>`);
+                                        }
+                                    </script>
+                                </tr>
+                            </thead>
+                            <tbody id="checklist-body">
+                                </tbody>
+                        </table>
+                    </div>
+                    <div class="controls" style="margin-top: 20px;">
+                        <button onclick="clearChecklist()">Reset Checklist</button>
+                    </div>
+                </section>
+
+                <section id="tips-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2>Trik dan Tips Agar Semangat Ibadah</h2>
+                    <div class="list-item">
+                        <h4>1. Jadikan Ibadah Kebiasaan Kecil</h4>
+                        <p>Mulai dari hal kecil, seperti salat satu waktu sehari, lalu tingkatkan bertahap. Konsistensi lebih penting daripada intensitas.</p>
+                    </div>
+                    <div class="list-item">
+                        <h4>2. Manfaatkan Teknologi Positif</h4>
+                        <p>Gunakan aplikasi pengingat salat, aplikasi Quran digital, atau dengarkan ceramah/podcast inspiratif di perjalanan.</p>
+                    </div>
+                    <div class="list-item">
+                        <h4>3. Cari Lingkungan yang Mendukung</h4>
+                        <p>Habiskan waktu dengan teman-teman yang juga peduli pada ibadah. Ikut kegiatan remaja di masjid atau komunitas keagamaan.</p>
+                    </div>
+                    <div class="list-item">
+                        <h4>4. Temukan Makna di Balik Ibadah</h4>
+                        <p>Pahami tujuan dari setiap ibadah. Salat bukan hanya gerakan, tapi sarana untuk berkomunikasi dengan Tuhan dan mencari ketenangan.</p>
+                    </div>
+                </section>
+
+                <section id="doa-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2>Doa dan Bacaan Lengkap Sholat</h2>
+                    <div class="list-item">
+                        <h4>Niat dan Takbiratul Ihram<button class="audio-btn" onclick="playAudio('takbirAudio')"><i class="fas fa-play"></i></button></h4>
+                        <p>Niat sholat (sesuai waktu sholat yang dikerjakan) dan membaca:</p>
+                        <p class="arab">اَللّٰهُ أَكْبَرُ</p>
+                        <p class="transliterasi">"Allahu Akbar."</p>
+                        <p>Artinya: "Allah Maha Besar."</p>
+                        <audio id="takbirAudio" src="URL_AUDIO_TAKBIROTUL_IHRAM.mp3"></audio>
+                    </div>
+                    <div class="list-item">
+                        <h4>Doa Iftitah<button class="audio-btn" onclick="playAudio('iftitahAudio')"><i class="fas fa-play"></i></button></h4>
+                        <p class="arab">
+                            اَللهُ أَكْبَرُ كَبِيْرًا وَالْحَمْدُ لِلّٰهِ كَثِيْرًا وَسُبْحَانَ اللهِ بُكْرَةً وَأَصِيْلًا. إِنِّيْ وَجَّهْتُ وَجْهِيَ لِلَّذِيْ فَطَرَ السَّمَاوَاتِ وَالْأَرْضَ حَنِيْفًا مُسْلِمًا وَمَا أَنَا مِنَ الْمُشْرِكِيْنَ. إِنَّ صَلَاتِيْ وَنُسُكِيْ وَمَحْيَايَ وَمَمَاتِيْ لِلّٰهِ رَبِّ الْعَالَمِيْنَ. لَا شَرِيْكَ لَهُ وَبِذٰلِكَ أُمِرْتُ وَأَنَا مِنَ الْمُسْلِمِيْنَ.
+                        </p>
+                        <p class="transliterasi">
+                            "Allahu Akbar kabira, wal hamdu lillahi katsira, wa subhanallahi bukratan wa ashila. Inni wajjahtu wajhiya lilladzi fataras-samawati wal-ardha hanifan musliman, wa ma ana minal musyrikin. Inna sholati wa nusuki wa mahyaya wa mamati lillahi rabbil 'alamin. La syarika lahu wa bidzalika umirtu wa ana minal muslimin."
+                        </p>
+                        <p>Artinya: "Allah Maha Besar dengan sebesar-besarnya. Segala puji hanya bagi Allah dengan pujian yang banyak. Maha Suci Allah di waktu pagi dan petang. Sesungguhnya aku hadapkan wajahku kepada Zat yang menciptakan langit dan bumi dengan lurus dan berserah diri, dan aku bukanlah dari golongan orang-orang musyrik. Sesungguhnya salatku, ibadahku, hidupku, dan matiku hanyalah untuk Allah, Tuhan semesta alam. Tidak ada sekutu bagi-Nya, dan karena itu aku diperintahkan dan aku termasuk golongan orang yang berserah diri (muslim)."</p>
+                        <audio id="iftitahAudio" src="URL_AUDIO_IFITITAH.mp3"></audio>
+                    </div>
+                    <div class="list-item">
+                        <h4>Membaca Al-Fatihah<button class="audio-btn" onclick="playAudio('fatihahAudio')"><i class="fas fa-play"></i></button></h4>
+                        <p class="arab">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
+                        <p class="transliterasi">1. "Bismillâhir-raḥmânir-raḥîm."</p>
+                        <p class="arab">اَلْحَمْدُ لِلّٰهِ رَبِّ الْعٰلَمِيْنَۙ</p>
+                        <p class="transliterasi">2. "Al-ḥamdu lillâhi rabbil-‘âlamîn."</p>
+                        <p class="arab">اَلرَّحْمٰنِ الرَّحِيْمِۙ</p>
+                        <p class="transliterasi">3. "Ar-raḥmânir-raḥîm."</p>
+                        <p class="arab">مٰلِكِ يَوْمِ الدِّيْنِۗ</p>
+                        <p class="transliterasi">4. "Mâliki yaumid-dîn."</p>
+                        <p class="arab">اِيَّاكَ نَعْبُدُ وَاِيَّاكَ نَسْتَعِيْنُۗ</p>
+                        <p class="transliterasi">5. "Iyyâka na‘budu wa iyyâka nasta‘în."</p>
+                        <p class="arab">اِهْدِنَا الصِّرَاطَ الْمُسْتَقِيْمَۙ</p>
+                        <p class="transliterasi">6. "Ihdinaṣ-ṣirâṭal-mustaqîm."</p>
+                        <p class="arab">صِرَاطَ الَّذِيْنَ اَنْعَمْتَ عَلَيْهِمْ ەۙ غَيْرِ الْمَغْضُوْبِ عَلَيْهِمْ وَلَا الضَّاۤلِّيْنَ ࣖ</p>
+                        <p class="transliterasi">7. "Ṣirâṭal-lażîna an‘amta ‘alaihim ghairil-maghḍûbi ‘alaihim wa laḍ-ḍâllîn."</p>
+                        <audio id="fatihahAudio" src="URL_AUDIO_FATIHah.mp3"></audio>
+                    </div>
+                    <div class="list-item">
+                        <h4>Membaca Surat Pendek (Al-Ikhlas)<button class="audio-btn" onclick="playAudio('ikhlasAudio')"><i class="fas fa-play"></i></button></h4>
+                        <p class="arab">قُلْ هُوَ اللّٰهُ اَحَدٌ</p>
+                        <p class="transliterasi">1. "Qul huwallâhu aḥad."</p>
+                        <p class="arab">اَللّٰهُ الصَّمَدُ</p>
+                        <p class="transliterasi">2. "Allâhuṣ-ṣamad."</p>
+                        <p class="arab">لَمْ يَلِدْ وَلَمْ يُوْلَدْ</p>
+                        <p class="transliterasi">3. "Lam yalid wa lam yûlad."</p>
+                        <p class="arab">وَلَمْ يَكُنْ لَّهٗ كُفُوًا اَحَدٌ</p>
+                        <p class="transliterasi">4. "Wa lam yakul lahû kufuwan aḥad."</p>
+                        <audio id="ikhlasAudio" src="URL_AUDIO_AL_IKHLAS.mp3"></audio>
+                    </div>
+                    <div class="list-item">
+                        <h4>Rukuk<button class="audio-btn" onclick="playAudio('rukukAudio')"><i class="fas fa-play"></i></button></h4>
+                        <p class="arab">سُبْحَانَ رَبِّيَ الْعَظِيمِ وَبِحَمْدِهِ</p>
+                        <p class="transliterasi">"Subhaana rabbiyal ‘adhiimi wa bihamdih." (3x)</p>
+                        <p>Artinya: "Mahasuci Tuhanku yang Maha Agung dan dengan segala puji-Nya."</p>
+                        <audio id="rukukAudio" src="URL_AUDIO_RUKUK.mp3"></audio>
+                    </div>
+                    <div class="list-item">
+                        <h4>I'tidal<button class="audio-btn" onclick="playAudio('itidalAudio')"><i class="fas fa-play"></i></button></h4>
+                        <p class="arab">سَمِعَ اللّٰهُ لِمَنْ حَمِدَهُ</p>
+                        <p class="transliterasi">"Sami‘allahu liman hamidah."</p>
+                        <p>Artinya: "Allah mendengar orang yang memuji-Nya."</p>
+                        <p class="arab">رَبَّنَا لَكَ الْحَمْدُ مِلْءَ السَّمَاوَاتِ وَمِلْءَ الأَرْضِ وَمِلْءَ مَا شِئْتَ مِنْ شَيْءٍ بَعْدُ</p>
+                        <p class="transliterasi">"Rabbana lakal hamdu mil'us-samawati wa mil'ul-ardhi wa mil'a ma syi'ta min syai'in ba'du."</p>
+                        <p>Artinya: "Ya Tuhan kami, hanya bagi-Mu segala puji, sepenuh langit, sepenuh bumi, dan sepenuh apa saja yang Engkau kehendaki sesudah itu."</p>
+                        <audio id="itidalAudio" src="URL_AUDIO_I_TIDAL.mp3"></audio>
+                    </div>
+                    <div class="list-item">
+                        <h4>Sujud<button class="audio-btn" onclick="playAudio('sujudAudio')"><i class="fas fa-play"></i></button></h4>
+                        <p class="arab">سُبْحَانَ رَبِّيَ الأَعْلَى وَبِحَمْدِهِ</p>
+                        <p class="transliterasi">"Subhaana rabbiyal a‘laa wa bihamdih." (3x)</p>
+                        <p>Artinya: "Mahasuci Tuhanku yang Maha Tinggi dan dengan segala puji-Nya."</p>
+                        <audio id="sujudAudio" src="URL_AUDIO_SUJUD.mp3"></audio>
+                    </div>
+                    <div class="list-item">
+                        <h4>Duduk di Antara Dua Sujud<button class="audio-btn" onclick="playAudio('dudukSujudAudio')"><i class="fas fa-play"></i></button></h4>
+                        <p class="arab">رَبِّ اغْفِرْ لِي وَارْحَمْنِي وَاجْبُرْنِي وَارْفَعْنِي وَارْزُقْنِي وَاهْدِنِي وَعَافِنِي وَاعْفُ عَنِّي</p>
+                        <p class="transliterasi">"Rabbighfirli warhamni wajburni warfa'ni warzuqni wahdini wa'afini wa'fu anni."</p>
+                        <p>Artinya: "Ya Tuhanku, ampunilah aku, sayangilah aku, tutuplah aibku, angkatlah derajatku, berilah aku rezeki, berilah aku petunjuk, berilah aku kesehatan, dan ampunilah aku."</p>
+                        <audio id="dudukSujudAudio" src="URL_AUDIO_DUDUK_SUJUD.mp3"></audio>
+                    </div>
+                    <div class="list-item">
+                        <h4>Bacaan Tahiyat Awal (khusus rakaat kedua)<button class="audio-btn" onclick="playAudio('tahiyatAwalAudio')"><i class="fas fa-play"></i></button></h4>
+                        <p class="arab">اَلتَّحِيَّاتُ لِلّٰهِ وَالصَّلَوَاتُ الطَّيِّبَاتُ، اَلسَّلاَمُ عَلَيْكَ أَيُّهاَ النَّبِيُّ وَرَحْمَةُ اللهِ وَبَرَكَاتُهُ، اَلسَّلاَمُ عَلَيْنَا وَعَلَى عِبَادِ اللهِ الصَّالِحِيْنَ، أَشْهَدُ اَنْ لاَ إِلَهَ إِلاَّ اللهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُوْلُهُ</p>
+                        <p class="transliterasi">"Attahiyyaatul mubaarakaatush shalawaatuth thayyibaatu lillaah. Assalaamu 'alaika ayyuhan-nabiyyu warahmatullaahi wabarakaatuh. Assalaamu 'alainaa wa 'alaa 'ibaadillaahish-shaalihiin. Asyhadu an laa ilaaha illallaah, wa asyhadu anna muhammadan 'abduhuu wa rasuuluh."</p>
+                        <p>Artinya: "Segala penghormatan, keberkahan, shalawat, dan kebaikan adalah milik Allah. Semoga salam, rahmat Allah, dan berkah-Nya terlimpah padamu, wahai Nabi. Semoga salam juga terlimpah pada kami dan hamba-hamba Allah yang saleh. Aku bersaksi bahwa tiada Tuhan selain Allah, dan aku bersaksi bahwa Muhammad adalah hamba dan utusan-Nya."</p>
+                        <audio id="tahiyatAwalAudio" src="URL_AUDIO_TAHIYAT_AWAL.mp3"></audio>
+                    </div>
+                    <div class="list-item">
+                        <h4>Bacaan Tahiyat Akhir (lengkap)<button class="audio-btn" onclick="playAudio('tahiyatAkhirAudio')"><i class="fas fa-play"></i></button></h4>
+                        <p class="arab">اَلتَّحِيَّاتُ لِلّٰهِ وَالصَّلَوَاتُ الطَّيِّبَاتُ، اَلسَّلاَمُ عَلَيْكَ أَيُّهاَ النَّبِيُّ وَرَحْمَةُ اللهِ وَبَرَكَاتُهُ، اَلسَّلاَمُ عَلَيْنَا وَعَلَى عِبَادِ اللهِ الصَّالِحِيْنَ، أَشْهَدُ اَنْ لاَ إِلَهَ إِلاَّ اللهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُوْلُهُ. اَللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيْمَ وَعَلَى آلِ إِبْرَاهِيْمَ، وَبَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ، كَمَا بَارَكْتَ عَلَى إِبْرَاهِيْمَ وَعَلَى آلِ إِبْرَاهِيْمَ، فِي الْعَالَمِيْنَ إِنَّكَ حَمِيْدٌ مَجِيْدٌ</p>
+                        <p class="transliterasi">"Attahiyyaatul mubaarakaatush shalawaatuth thayyibaatu lillaah. Assalaamu 'alaika ayyuhan-nabiyyu warahmatullaahi wabarakaatuh. Assalaamu 'alainaa wa 'alaa 'ibaadillaahish-shaalihiin. Asyhadu an laa ilaaha illallaah, wa asyhadu anna muhammadan 'abduhuu wa rasuuluh. Allaahumma shalli 'alaa muhammadin wa 'alaa aali muhammad, kamaa shallaita 'alaa ibraahiima wa 'alaa aali ibraahim. Wa baarik 'alaa muhammadin wa 'alaa aali muhammad, kamaa baarakta 'alaa ibraahiima wa 'alaa aali ibraahim. Fil 'aalamiina innaka hamidum majiid."</p>
+                        <p>Artinya: "Segala penghormatan, keberkahan, shalawat, dan kebaikan adalah milik Allah. Semoga salam, rahmat Allah, dan berkah-Nya terlimpah padamu, wahai Nabi. Semoga salam juga terlimpah pada kami dan hamba-hamba Allah yang saleh. Aku bersaksi bahwa tiada Tuhan selain Allah, dan aku bersaksi bahwa Muhammad adalah hamba dan utusan-Nya. Ya Allah, limpahkanlah rahmat kepada Nabi Muhammad dan keluarga Nabi Muhammad, sebagaimana Engkau telah melimpahkan rahmat kepada Nabi Ibrahim dan keluarga Nabi Ibrahim. Dan limpahkanlah berkah kepada Nabi Muhammad dan keluarga Nabi Muhammad, sebagaimana Engkau melimpahkan berkah kepada Nabi Ibrahim dan keluarga Nabi Ibrahim. Sesungguhnya di alam semesta Engkau Maha Terpuji lagi Maha Mulia."</p>
+                        <audio id="tahiyatAkhirAudio" src="URL_AUDIO_TAHIYAT_AKHIR.mp3"></audio>
+                    </div>
+                    <div class="list-item">
+                        <h4>Salam<button class="audio-btn" onclick="playAudio('salamAudio')"><i class="fas fa-play"></i></button></h4>
+                        <p class="arab">اَلسَّلاَمُ عَلَيْكُمْ وَرَحْمَةُ اللهِ وَبَرَكَاتُهُ</p>
+                        <p class="transliterasi">"Assalamu'alaikum wa rahmatullahi wa barakatuh."</p>
+                        <p>Artinya: "Semoga keselamatan dan rahmat Allah serta berkah-Nya terlimpah untuk kalian."</p>
+                        <audio id="salamAudio" src="URL_AUDIO_SALAM.mp3"></audio>
+                    </div>
+                </section>
+
+                <section id="gerakan-sholat-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2>Panduan Gerakan Sholat yang Benar</h2>
+                    <p style="text-align: center;">Ikuti langkah-langkah berikut untuk memastikan gerakan sholat Anda sesuai dengan sunnah.</p>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Berdiri Tegak dan Takbiratul Ihram">
+                        <div class="gerakan-desc">
+                            <h4>1. Berdiri Tegak dan Takbiratul Ihram</h4>
+                            <p>Menghadap kiblat dengan posisi tangan diangkat sejajar bahu atau telinga. Ucapkan "Allahu Akbar".</p>
+                        </div>
+                    </div>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Sedekap (Qiyam)">
+                        <div class="gerakan-desc">
+                            <h4>2. Sedekap (Qiyam)</h4>
+                            <p>Setelah takbir, letakkan tangan kanan di atas tangan kiri, di atas dada atau di bawah pusar. Bacaan sholat dimulai dari sini.</p>
+                        </div>
+                    </div>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Rukuk">
+                        <div class="gerakan-desc">
+                            <h4>3. Rukuk</h4>
+                            <p>Bungkukkan badan dengan punggung lurus, sejajar dengan tanah. Tangan memegang lutut. Pandangan lurus ke tempat sujud. Bacalah doa rukuk 3x.</p>
+                        </div>
+                    </div>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan I'tidal">
+                        <div class="gerakan-desc">
+                            <h4>4. I'tidal (Bangun dari Rukuk)</h4>
+                            <p>Angkat badan kembali ke posisi berdiri tegak. Tangan diluruskan di sisi badan. Bacalah doa i'tidal.</p>
+                        </div>
+                    </div>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Sujud">
+                        <div class="gerakan-desc">
+                            <h4>5. Sujud</h4>
+                            <p>Turun dan letakkan dahi, hidung, kedua telapak tangan, lutut, dan ujung-ujung jari kaki di lantai. Usahakan semua anggota sujud menempel sempurna. Baca doa sujud 3x.</p>
+                        </div>
+                    </div>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Duduk di Antara Dua Sujud">
+                        <div class="gerakan-desc">
+                            <h4>6. Duduk di Antara Dua Sujud</h4>
+                            <p>Angkat badan dari sujud dan duduklah dengan punggung lurus. Kaki kiri diduduki dan kaki kanan ditegakkan. Baca doa duduk di antara dua sujud.</p>
+                        </div>
+                    </div>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Sujud Kedua">
+                        <div class="gerakan-desc">
+                            <h4>7. Sujud Kedua</h4>
+                            <p>Ulangi gerakan sujud yang pertama dengan bacaan yang sama.</p>
+                        </div>
+                    </div>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Tahiyat / Tasyahud">
+                        <div class="gerakan-desc">
+                            <h4>8. Tahiyat / Tasyahud</h4>
+                            <p>Duduk seperti saat duduk di antara dua sujud (tasyahud awal) atau dengan posisi kaki kanan tegak dan pantat menyentuh lantai (tasyahud akhir). Baca doa tahiyat hingga selesai.</p>
+                        </div>
+                    </div>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Salam">
+                        <div class="gerakan-desc">
+                            <h4>9. Salam</h4>
+                            <p>Palingkan wajah ke kanan, lalu ke kiri, sambil mengucapkan "Assalamu'alaikum wa rahmatullah".</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="wudhu-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2>Panduan Lengkap Wudhu yang Benar</h2>
+                    <p style="text-align: center;">Wudhu adalah syarat sah sholat. Ikuti langkah-langkah berikut agar wudhu Anda sempurna.</p>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Basuh Tangan dan Niat">
+                        <div class="gerakan-desc">
+                            <h4>1. Niat dan Basuh Telapak Tangan<button class="audio-btn" onclick="playAudio('niatWudhuAudio')"><i class="fas fa-play"></i></button></h4>
+                            <p>Niat Wudhu: <span class="transliterasi">"Nawaitul wudhuu’a lirof’il hadatsil ashghori fardlon lillaahi ta’aalaa."</span><br>Artinya: "Saya niat berwudu untuk menghilangkan hadas kecil, fardu karena Allah ta'ala."<br>Setelah itu, basuh telapak tangan tiga kali sambil menyela-nyela jari.</p>
+                            <audio id="niatWudhuAudio" src=niatWudhuAudio"https://vt.tiktok.com/ZSDxXDxXv/.mp3"></audio>
+                        </div>
+                    </div>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Berkumur dan Membasuh Hidung">
+                        <div class="gerakan-desc">
+                            <h4>2. Berkumur dan Membasuh Hidung</h4>
+                            <p>Kumur-kumur tiga kali. Masukkan air ke dalam hidung dan keluarkan tiga kali.</p>
+                        </div>
+                    </div>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Membasuh Wajah">
+                        <div class="gerakan-desc">
+                            <h4>3. Membasuh Wajah</h4>
+                            <p>Basuh seluruh wajah tiga kali dari dahi hingga dagu dan dari telinga kanan ke telinga kiri.</p>
+                        </div>
+                    </div>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Membasuh Kedua Tangan">
+                        <div class="gerakan-desc">
+                            <h4>4. Membasuh Kedua Tangan</h4>
+                            <p>Basuh tangan kanan dari ujung jari hingga siku tiga kali, lalu basuh tangan kiri dengan cara yang sama.</p>
+                        </div>
+                    </div>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Mengusap Sebagian Kepala">
+                        <div class="gerakan-desc">
+                            <h4>5. Mengusap Sebagian Kepala</h4>
+                            <p>Usap sebagian rambut kepala dengan tangan yang basah sekali.</p>
+                        </div>
+                    </div>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Membasuh Kedua Telinga">
+                        <div class="gerakan-desc">
+                            <h4>6. Membasuh Kedua Telinga</h4>
+                            <p>Usap telinga luar dan dalam dengan jari telunjuk dan ibu jari sekali.</p>
+                        </div>
+                    </div>
+                    <div class="list-item gerakan-step">
+                        <img src="" alt="Gerakan Membasuh Kedua Kaki">
+                        <div class="gerakan-desc">
+                            <h4>7. Membasuh Kedua Kaki</h4>
+                            <p>Basuh kaki kanan hingga mata kaki tiga kali, lalu kaki kiri dengan cara yang sama. Pastikan sela-sela jari kaki juga dibersihkan.</p>
+                        </div>
+                    </div>
+                    <div class="list-item">
+                        <h4>8. Berdoa Setelah Wudhu<button class="audio-btn" onclick="playAudio('doaWudhuAudio')"><i class="fas fa-play"></i></button></h4>
+                        <p class="arab">أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ. اَللَّهُمَّ اجْعَلْنِي مِنَ التَّوَّابِينَ، وَاجْعَلْنِي مِنَ الْمُتَطَهِّرِينَ، وَاجْعَلْنِي مِنْ عِبَادِكَ الصَّالِحِينَ</p>
+                        <p class="transliterasi">"Asyhadu an laa ilaaha illallaahu wahdahuu laa syariikalahu, wa asyhadu anna muhammadan ‘abduhuu wa rosuuluh. Allohummaj’alnii minat tawwaabiina, waj’alnii minal mutathohhiriina, waj’alnii min ‘ibaadikas-shoolihiin."</p>
+                        <p>Artinya: "Aku bersaksi bahwa tiada Tuhan selain Allah Yang Maha Esa, tiada sekutu bagi-Nya, dan aku bersaksi bahwa Muhammad adalah hamba dan utusan-Nya. Ya Allah, jadikanlah aku termasuk orang-orang yang bertaubat, dan jadikanlah aku termasuk orang-orang yang suci, dan jadikanlah aku termasuk hamba-hamba-Mu yang shalih."</p>
+                        <audio id="doaWudhuAudio" src="URL_AUDIO_DOA_WUDHU.mp3"></audio>
+                    </div>
+                </section>
+
+                <section id="hadis-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2>Hadis-hadis Pilihan tentang Ibadah</h2>
+                    <div class="list-item">
+                        <h4>Hadis tentang Salat Tepat Waktu</h4>
+                        <p style="font-style: italic; font-size: 1.1em;">"Amal yang paling dicintai Allah adalah salat pada waktunya."</p>
+                        <p>— HR. Bukhari dan Muslim</p>
+                    </div>
+                    <div class="list-item">
+                        <h4>Hadis tentang Keutamaan Wudu</h4>
+                        <p style="font-style: italic; font-size: 1.1em;">"Apabila seorang Muslim berwudu, kemudian ia membasuh mukanya, maka setiap dosa yang ia perbuat dengan mukanya akan keluar bersama air, atau bersama tetesan air yang terakhir..."</p>
+                        <p>— HR. Muslim</p>
+                    </div>
+                    <div class="list-item">
+                        <h4>Hadis tentang Keutamaan Bersujud</h4>
+                        <p style="font-style: italic; font-size: 1.1em;">"Jarak terdekat seorang hamba dengan Tuhannya adalah ketika ia sedang bersujud."</p>
+                        <p>— HR. Muslim</p>
+                    </div>
+                </section>
+
+                <section id="profile-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2>Profil Pengguna</h2>
+                    <div class="profile-container" style="text-align: center;">
+                        <img id="profile-picture" src="https://i.ibb.co/L89YfHh/profil-placeholder.png" alt="Profil Pengguna">
+                        <h3>Nama Pengguna</h3>
+                        <p>Analis Data | Organisasi XYZ</p>
+                        <p>Email: <a href="mailto:user@example.com">user@example.com</a></p>
+                    </div>
+                    <div style="margin-top: 20px; text-align: center;">
+                        <label for="file-upload" class="custom-file-upload">
+                            <i class="fas fa-camera"></i> Unggah Foto
+                        </label>
+                        <input id="file-upload" type="file" accept="image/*" onchange="previewImage(event)"/>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <p><strong>Bio:</strong> Saya adalah seorang analis data yang berfokus pada tren sosial dan perilaku remaja. Dashboard ini adalah proyek pribadi untuk memvisualisasikan data dan mengedukasi masyarakat tentang isu penting ini.</p>
+                    </div>
+                </section>
+
+                <section id="web-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2>Sumber Data & Referensi Web</h2>
+                    <p>Berikut adalah beberapa sumber referensi yang relevan dengan tren sosial dan data ibadah di kalangan remaja. Data pada dashboard ini bersifat hipotetis, namun terinspirasi dari riset sejenis.</p>
+                    <ul class="web-list">
+                        <li><i class="fas fa-link"></i> <a href="https://www.pewresearch.org/" target="_blank">Pew Research Center</a><p>Lembaga riset yang sering menerbitkan survei tentang agama dan kehidupan sosial di berbagai negara.</p></li>
+                        <li><i class="fas fa-link"></i> <a href="https://www.bps.go.id/" target="_blank">Badan Pusat Statistik (BPS) Indonesia</a><p>Sumber data resmi pemerintah Indonesia untuk demografi dan statistik sosial.</p></li>
+                        <li><i class="fas fa-link"></i> <a href="https://www.unicef.org/indonesia" target="_blank">UNICEF Indonesia</a><p>Informasi dan laporan tentang kesejahteraan, pendidikan, dan kesehatan anak dan remaja di Indonesia.</p></li>
+                    </ul>
+                </section>
+
+                <div class="controls">
+                    <button onclick="updateData()">Update Data (Simulasi 2024)</button>
+                    <button onclick="resetData()">Reset Data</button>
+                </div>
+                <p id="info" style="text-align: center;">Catatan: Data ini bersifat edukatif. Untuk data real, konsultasikan dengan lembaga seperti Kemenag atau survei resmi.</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Data dashboard
+        let database = [
+            { year: 2020, percentage: 70, factor: 'Pandemi COVID-19 (kurang motivasi)', solution: 'Program online ibadah virtual' },
+            { year: 2021, percentage: 60, factor: 'Kenaikan penggunaan TikTok/Instagram', solution: 'Batasan screen time & reminder app' },
+            { year: 2022, percentage: 50, factor: 'Tekanan ujian sekolah & ekstrakurikuler', solution: 'Integrasi ibadah ke jadwal harian' },
+            { year: 2023, percentage: 45, factor: 'Influence budaya pop & peer pressure', solution: 'Konseling remaja di masjid/gereja' }
+        ];
+
+        const originalDatabase = JSON.parse(JSON.stringify(database)); // Salinan data asli untuk reset
+
+        // Inisialisasi Chart.js
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: database.map(item => item.year),
+                datasets: [{
+                    label: 'Persentase Rutin Ibadah (%)',
+                    data: database.map(item => item.percentage),
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true, max: 100 }
+                }
+            }
+        });
+
+        // Fungsi untuk mengupdate data ke simulasi 2024
+        function updateData() {
+            const year2024Exists = database.some(item => item.year === 2024);
+
+            if (!year2024Exists) {
+                // Tambahkan data 2024 ke "database"
+                const newData = {
+                    year: 2024,
+                    percentage: 40,
+                    factor: 'AI & Metaverse distraction',
+                    solution: 'Workshop digital detox untuk remaja'
+                };
+                database.push(newData);
+            }
+
+            // Perbarui chart
+            myChart.data.labels = database.map(item => item.year);
+            myChart.data.datasets[0].data = database.map(item => item.percentage);
+            myChart.update();
+
+            // Perbarui statistik
+            const lastPercentage = database[database.length - 1].percentage;
+            const firstPercentage = database[0].percentage;
+            const decline = firstPercentage - lastPercentage;
+            document.getElementById('penurunan').innerText = `${decline}% (dari ${firstPercentage}% ke ${lastPercentage}% rutin ibadah)`;
+            document.getElementById('progress-penurunan').style.width = `${lastPercentage}%`;
+
+            // Atur ulang filter agar menampilkan semua data
+            document.getElementById('yearFilter').value = 'all';
+
+            // Perbarui tampilan tabel dan statistik
+            showToast('Data berhasil diupdate dengan simulasi 2024!');
+            showSection('stats');
+        }
+
+        // Fungsi untuk mereset data ke kondisi awal
+        function resetData() {
+            // Kembalikan database ke data asli
+            database = JSON.parse(JSON.stringify(originalDatabase));
+
+            // Perbarui chart
+            myChart.data.labels = database.map(item => item.year);
+            myChart.data.datasets[0].data = database.map(item => item.percentage);
+            myChart.update();
+
+            // Perbarui statistik
+            const lastPercentage = database[database.length - 1].percentage;
+            const firstPercentage = database[0].percentage;
+            const decline = firstPercentage - lastPercentage;
+            document.getElementById('penurunan').innerText = `${decline}% (dari ${firstPercentage}% ke ${lastPercentage}% rutin ibadah)`;
+            document.getElementById('progress-penurunan').style.width = `${lastPercentage}%`;
+
+            // Atur ulang filter agar menampilkan semua data
+            document.getElementById('yearFilter').value = 'all';
+
+            showToast('Data dikembalikan ke kondisi awal.');
+            showSection('stats');
+        }
+
+        // Fungsi untuk memfilter grafik berdasarkan tahun
+        function filterChart() {
+            const filter = document.getElementById('yearFilter').value;
+            let filteredData = database;
+
+            if (filter === '2020-2022') {
+                filteredData = database.filter(item => item.year >= 2020 && item.year <= 2022);
+            } else if (filter === '2022-2024') {
+                filteredData = database.filter(item => item.year >= 2022);
+            }
+
+            myChart.data.labels = filteredData.map(item => item.year);
+            myChart.data.datasets[0].data = filteredData.map(item => item.percentage);
+            myChart.update();
+        }
+
+        // Fungsi untuk merender tabel secara dinamis dari database
+        function renderTable() {
+            const tableBody = document.querySelector('#dataTable tbody');
+            tableBody.innerHTML = ''; // Kosongkan tabel yang ada
+
+            database.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.year}</td>
+                    <td>${item.percentage}%</td>
+                    <td>${item.factor}</td>
+                    <td>${item.solution}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Fungsi untuk menampilkan bagian dashboard yang berbeda
+        function showSection(section) {
+            // Sembunyikan semua section
+            document.getElementById('home-section').style.display = 'none';
+            document.getElementById('stats-section').style.display = 'none';
+            document.getElementById('chart-section').style.display = 'none';
+            document.getElementById('table-section').style.display = 'none';
+            document.getElementById('checklist-section').style.display = 'none';
+            document.getElementById('tips-section').style.display = 'none';
+            document.getElementById('doa-section').style.display = 'none';
+            document.getElementById('wudhu-section').style.display = 'none';
+            document.getElementById('gerakan-sholat-section').style.display = 'none';
+            document.getElementById('hadis-section').style.display = 'none';
+            document.getElementById('profile-section').style.display = 'none';
+            document.getElementById('web-section').style.display = 'none';
+
+            // Tampilkan section yang dipilih
+            document.getElementById(`${section}-section`).style.display = 'block';
+
+            // Muat data checklist dan tabel saat section yang relevan ditampilkan
+            if (section === 'checklist') {
+                loadChecklist();
+            } else if (section === 'table') {
+                renderTable();
+            }
+        }
+
+        // Fungsi untuk menampilkan notifikasi pop-up (toast)
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        // Fungsi untuk mengubah tema (mode gelap/terang)
+        function toggleTheme() {
+            const body = document.body;
+            const isDarkMode = body.getAttribute('data-theme') === 'dark';
+            const newTheme = isDarkMode ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            document.querySelector('.theme-toggle button i').className = isDarkMode ? 'fas fa-moon' : 'fas fa-sun';
+            document.querySelector('.theme-toggle button').innerText = isDarkMode ? 'Dark Mode' : 'Light Mode';
+        }
+
+        // Fungsi untuk pratinjau foto yang diunggah
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profile-picture').src = e.target.result;
+                    showToast('Foto profil berhasil diperbarui!');
+                }
+                reader.readAsDataURL(file);
+            } else {
+                showToast('Mohon unggah file gambar yang valid.');
+            }
+        }
+        
+        // Fungsi untuk memutar audio
+        function playAudio(audioId) {
+            const audio = document.getElementById(audioId);
+            // Hentikan semua audio yang sedang diputar
+            document.querySelectorAll('audio').forEach(a => {
+                if (a !== audio) {
+                    a.pause();
+                    a.currentTime = 0;
+                }
+            });
+            audio.play();
+        }
+
+        // --- Fungsi untuk Fitur Checklist 40 Hari ---
+        const sholatNames = ['Subuh', 'Zuhur', 'Ashar', 'Magrib', 'Isya'];
+        const checklistBody = document.getElementById('checklist-body');
+        const storageKey = 'sholatChecklist40Hari';
+
+        function createChecklistTable() {
+            sholatNames.forEach(sholat => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${sholat}</td>`;
+                for (let i = 1; i <= 40; i++) {
+                    const cell = document.createElement('td');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `${sholat.toLowerCase()}-day-${i}`;
+                    checkbox.addEventListener('change', saveChecklist);
+                    cell.appendChild(checkbox);
+                    row.appendChild(cell);
+                }
+                checklistBody.appendChild(row);
+            });
+        }
+
+        function saveChecklist() {
+            const checklistData = {};
+            sholatNames.forEach(sholat => {
+                checklistData[sholat.toLowerCase()] = {};
+                for (let i = 1; i <= 40; i++) {
+                    const checkbox = document.getElementById(`${sholat.toLowerCase()}-day-${i}`);
+                    checklistData[sholat.toLowerCase()][i] = checkbox.checked;
+                }
+            });
+            localStorage.setItem(storageKey, JSON.stringify(checklistData));
+            showToast('Checklist berhasil disimpan!');
+        }
+
+        function loadChecklist() {
+            const savedData = localStorage.getItem(storageKey);
+            if (savedData) {
+                const checklistData = JSON.parse(savedData);
+                sholatNames.forEach(sholat => {
+                    for (let i = 1; i <= 40; i++) {
+                        const checkbox = document.getElementById(`${sholat.toLowerCase()}-day-${i}`);
+                        if (checkbox && checklistData[sholat.toLowerCase()][i]) {
+                            checkbox.checked = checklistData[sholat.toLowerCase()][i];
+                        }
+                    }
+                });
+            }
+        }
+
+        function clearChecklist() {
+            if (confirm('Apakah Anda yakin ingin mereset semua checklist?')) {
+                localStorage.removeItem(storageKey);
+                document.querySelectorAll('.checklist-table input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                showToast('Checklist berhasil direset!');
+            }
+        }
+
+        // Fallback jika Chart.js gagal dimuat
+        window.addEventListener('load', function() {
+            if (typeof Chart === 'undefined') {
+                document.querySelector('.chart-container').innerHTML = '<p style="text-align:center; color:red;">Grafik tidak tersedia. Silakan periksa koneksi internet Anda atau gunakan tabel di bawah.</p>';
+            }
+            createChecklistTable();
+            loadChecklist();
+            showSection('home');
+        });
+    </script>
+</body>
+</html>
