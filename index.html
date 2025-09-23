@@ -383,6 +383,37 @@
             display: none;
         }
         
+        /* Gaya untuk Google Search Engine */
+        .gsc-control-cse {
+            background-color: var(--container-bg) !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .gsc-search-button-v2 {
+            display: none !important;
+        }
+        .gsc-input {
+            border: 1px solid #ccc !important;
+            border-radius: 20px !important;
+            padding: 10px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        .gsc-results-wrapper-visible {
+            display: block !important;
+        }
+        .gsc-result {
+            padding: 15px !important;
+            border-bottom: 1px solid #eee !important;
+        }
+        .gsc-resultsbox-visible {
+            border: none !important;
+        }
+        .gsc-search-box {
+            display: block !important;
+            width: 100% !important;
+        }
+
         /* Media Queries untuk Responsif */
         @media (max-width: 768px) {
             .dashboard {
@@ -440,6 +471,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+    <script async src="https://cse.google.com/cse.js?cx=94e8fa0762f794b19"></script>
 </head>
 <body>
     <div class="theme-toggle">
@@ -469,15 +501,16 @@
         <main class="main-content">
             <div class="header-container">
                 <h1 style="margin: 0;">Dashboard</h1>
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Cari..." oninput="searchContent()">
-                </div>
+                <div class="gcse-searchbox-only"></div>
             </div>
             
-            <p id="no-results">Tidak ada hasil yang ditemukan.</p>
+            <p id="no-results" style="display: none;">Tidak ada hasil yang ditemukan.</p>
 
             <div class="container">
+                <section id="search-results-section" style="display: none;">
+                    <div class="gcse-searchresults-only"></div>
+                </section>
+
                 <section id="home-section" style="display: block;">
                     <h2>Selamat Datang di Dashboard</h2>
                     <p style="text-align: center;">Dashboard ini menyajikan data hipotetis mengenai tren penurunan ibadah di kalangan remaja. Data ini bersifat edukatif dan terinspirasi dari riset global. Gunakan navigasi di samping untuk menjelajahi statistik, trik, doa, dan hadis.</p>
@@ -1023,7 +1056,6 @@
         
         // Fungsi untuk menampilkan bagian dashboard yang berbeda
         function showSection(section) {
-            document.getElementById('searchInput').value = '';
             // Sembunyikan semua section
             allSections.forEach(sec => {
                 sec.style.display = 'none';
@@ -1038,36 +1070,6 @@
                 loadChecklist();
             } else if (section === 'table') {
                 renderTable();
-            }
-        }
-
-        // Fungsi untuk mencari konten di seluruh dashboard
-        function searchContent() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            let hasResults = false;
-
-            allSections.forEach(sec => {
-                if (sec.id === 'home-section') {
-                    sec.style.display = 'none';
-                    return; // Jangan tampilkan section home saat mencari
-                }
-
-                const sectionContent = sec.textContent.toLowerCase();
-                if (sectionContent.includes(query)) {
-                    sec.style.display = 'block';
-                    hasResults = true;
-                } else {
-                    sec.style.display = 'none';
-                }
-            });
-
-            if (query === '') {
-                showSection('home');
-                noResultsMessage.style.display = 'none';
-            } else if (!hasResults) {
-                noResultsMessage.style.display = 'block';
-            } else {
-                noResultsMessage.style.display = 'none';
             }
         }
 
@@ -1192,11 +1194,17 @@
                 showToast('Checklist berhasil direset!');
             }
         }
+        
+        // Memastikan search results section disembunyikan saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchResultsSection = document.getElementById('search-results-section');
+            if (searchResultsSection) {
+                searchResultsSection.style.display = 'none';
+            }
 
-        // Fallback jika Chart.js gagal dimuat
-        window.addEventListener('load', function() {
+            // Memastikan chart dan checklist dimuat
             if (typeof Chart === 'undefined') {
-                document.querySelector('.chart-container').innerHTML = '<p style="text-align:center; color:red;">Grafik tidak tersedia. Silakan periksa koneksi internet Anda atau gunakan tabel di bawah.</p>';
+                document.querySelector('.chart-container').innerHTML = '<p style="text-align:center; color:red;">Grafik tidak tersedia. Silakan periksa koneksi internet Anda.</p>';
             }
             createChecklistTable();
             loadChecklist();
@@ -1205,4 +1213,3 @@
     </script>
 </body>
 </html>
-
