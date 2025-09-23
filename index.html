@@ -337,9 +337,38 @@
             .dashboard {
                 flex-direction: column;
             }
+            /* PERUBAHAN DI SINI UNTUK MENU DI ATAS */
             .sidebar {
                 width: 100%;
+                order: 1;
+                padding: 10px;
+                overflow-x: auto;
+                white-space: nowrap;
+                border-radius: 0 0 10px 10px;
+            }
+            .sidebar h2 {
+                display: none; /* Sembunyikan judul "Dashboard" di HP */
+            }
+            .sidebar ul {
+                display: flex;
+                flex-direction: row;
+                gap: 10px;
+                justify-content: space-between;
+                width: max-content;
+            }
+            .sidebar li {
+                display: inline-block;
+                padding: 8px 12px;
+                border-radius: 20px;
+                font-size: 0.8em;
+                margin: 0;
+            }
+            .sidebar li i {
+                margin-right: 5px;
+            }
+            .main-content {
                 order: 2;
+                padding-top: 10px;
             }
             .stats {
                 flex-direction: column;
@@ -1072,4 +1101,3 @@
     </script>
 </body>
 </html>
-
