@@ -14,15 +14,11 @@
             --text-color: #333;
             --accent-color: #3498db;
             --hover-color: #2980b9;
-            --checklist-green: #2ecc71;
-            --checklist-red: #e74c3c;
         }
         [data-theme="dark"] {
             --bg-color: #2c3e50;
             --container-bg: #34495e;
             --text-color: #ecf0f1;
-            --checklist-green: #27ae60;
-            --checklist-red: #c0392b;
         }
 
         /* Gaya Dasar */
@@ -363,17 +359,41 @@
         [data-theme="dark"] .checklist-table td:first-child {
             background-color: var(--container-bg);
         }
-        .checklist-table input[type="checkbox"] {
+        
+        /* Gaya untuk sel tabel checklist yang baru */
+        .checklist-cell {
             cursor: pointer;
-            transform: scale(1.2);
-        }
-        /* Penambahan untuk warna checklist */
-        .checklist-table td {
-            background-color: var(--checklist-red);
+            font-weight: bold;
             transition: background-color 0.3s;
         }
-        .checklist-table td.checked {
-            background-color: var(--checklist-green);
+        .checklist-cell:hover {
+            opacity: 0.8;
+        }
+        .checklist-cell.green {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .checklist-cell.orange {
+            background-color: #e67e22;
+            color: white;
+        }
+        .checklist-cell.red {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        /* Gaya untuk tombol warna */
+        .color-btn {
+            border: none;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        .color-btn:hover {
+            opacity: 1;
         }
 
         #no-results {
@@ -593,6 +613,14 @@
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2>Checklist Sholat Fardhu 40 Hari</h2>
                     <p style="text-align: center;">Tantang dirimu untuk sholat 5 waktu selama 40 hari tanpa terlewat. Ini adalah langkah awal yang luar biasa untuk menguatkan ibadahmu. </p>
+                    
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <p style="font-weight: bold;">Pilih Warna dan Simbol:</p>
+                        <button class="color-btn" data-color="green" style="background-color: #2ecc71; color: white;">✓ Tepat Waktu</button>
+                        <button class="color-btn" data-color="orange" style="background-color: #e67e22; color: white;">● Terlambat</button>
+                        <button class="color-btn" data-color="red" style="background-color: #e74c3c; color: white;">✗ Tidak Sholat</button>
+                    </div>
+
                     <div style="overflow-x: auto;">
                         <table class="checklist-table">
                             <thead>
@@ -605,8 +633,7 @@
                                     </script>
                                 </tr>
                             </thead>
-                            <tbody id="checklist-body">
-                                </tbody>
+                            <tbody id="checklist-body"></tbody>
                         </table>
                     </div>
                     <div class="controls" style="margin-top: 20px;">
@@ -1066,7 +1093,7 @@
 
             // Muat data checklist dan tabel saat section yang relevan ditampilkan
             if (section === 'checklist') {
-                loadChecklist();
+                createChecklistTable();
             } else if (section === 'table') {
                 renderTable();
             }
@@ -1152,37 +1179,46 @@
             audio.play();
         }
 
-        // --- Fungsi untuk Fitur Checklist 40 Hari ---
+        // --- Fungsi untuk Fitur Checklist 40 Hari yang Baru ---
         const sholatNames = ['Subuh', 'Zuhur', 'Ashar', 'Magrib', 'Isya'];
-        const checklistBody = document.getElementById('checklist-body');
         const storageKey = 'sholatChecklist40Hari';
+        let selectedColor = 'green'; // Default color
 
         function createChecklistTable() {
+            const checklistBody = document.getElementById('checklist-body');
+            checklistBody.innerHTML = '';
             sholatNames.forEach(sholat => {
                 const row = document.createElement('tr');
-                row.innerHTML = `<td>${sholat}</td>`;
+                row.innerHTML = `<td class="sticky left-0 bg-container-bg">${sholat}</td>`;
                 for (let i = 1; i <= 40; i++) {
                     const cell = document.createElement('td');
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = `${sholat.toLowerCase()}-day-${i}`;
-                    
-                    // Tambahkan event listener untuk mengubah warna sel
-                    checkbox.addEventListener('change', (event) => {
-                        const parentCell = event.target.closest('td');
-                        if (event.target.checked) {
-                            parentCell.classList.add('checked');
-                        } else {
-                            parentCell.classList.remove('checked');
-                        }
-                        saveChecklist();
-                    });
-                    
-                    cell.appendChild(checkbox);
+                    cell.id = `${sholat.toLowerCase()}-day-${i}`;
+                    cell.innerText = '';
+                    cell.classList.add('checklist-cell');
+                    cell.addEventListener('click', () => handleChecklistChange(sholat, i));
                     row.appendChild(cell);
                 }
                 checklistBody.appendChild(row);
             });
+            loadChecklist(); // Panggil load setelah tabel dibuat
+        }
+
+        function handleChecklistChange(sholat, day) {
+            const cell = document.getElementById(`${sholat.toLowerCase()}-day-${day}`);
+            const currentClass = Array.from(cell.classList).find(cls => ['green', 'orange', 'red'].includes(cls));
+
+            if (currentClass) {
+                cell.classList.remove(currentClass);
+            }
+
+            if (currentClass !== selectedColor) {
+                cell.classList.add(selectedColor);
+                cell.innerText = getSymbol(selectedColor);
+            } else {
+                cell.innerText = '';
+            }
+
+            saveChecklist();
         }
 
         function saveChecklist() {
@@ -1190,8 +1226,9 @@
             sholatNames.forEach(sholat => {
                 checklistData[sholat.toLowerCase()] = {};
                 for (let i = 1; i <= 40; i++) {
-                    const checkbox = document.getElementById(`${sholat.toLowerCase()}-day-${i}`);
-                    checklistData[sholat.toLowerCase()][i] = checkbox.checked;
+                    const cell = document.getElementById(`${sholat.toLowerCase()}-day-${i}`);
+                    const color = Array.from(cell.classList).find(cls => ['green', 'orange', 'red'].includes(cls));
+                    checklistData[sholat.toLowerCase()][i] = color || '';
                 }
             });
             localStorage.setItem(storageKey, JSON.stringify(checklistData));
@@ -1204,13 +1241,16 @@
                 const checklistData = JSON.parse(savedData);
                 sholatNames.forEach(sholat => {
                     for (let i = 1; i <= 40; i++) {
-                        const checkbox = document.getElementById(`${sholat.toLowerCase()}-day-${i}`);
-                        if (checkbox && checklistData[sholat.toLowerCase()][i]) {
-                            checkbox.checked = true;
-                            checkbox.closest('td').classList.add('checked');
-                        } else if (checkbox) {
-                            checkbox.checked = false;
-                            checkbox.closest('td').classList.remove('checked');
+                        const cell = document.getElementById(`${sholat.toLowerCase()}-day-${i}`);
+                        const color = checklistData[sholat.toLowerCase()][i];
+                        if (cell) {
+                            cell.classList.remove('green', 'orange', 'red');
+                            if (color) {
+                                cell.classList.add(color);
+                                cell.innerText = getSymbol(color);
+                            } else {
+                                cell.innerText = '';
+                            }
                         }
                     }
                 });
@@ -1220,11 +1260,18 @@
         function clearChecklist() {
             if (confirm('Apakah Anda yakin ingin mereset semua checklist?')) {
                 localStorage.removeItem(storageKey);
-                document.querySelectorAll('.checklist-table input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.checked = false;
-                    checkbox.closest('td').classList.remove('checked');
-                });
+                createChecklistTable();
                 showToast('Checklist berhasil direset!');
+            }
+        }
+
+        // Fungsi tambahan untuk mendapatkan simbol
+        function getSymbol(color) {
+            switch (color) {
+                case 'red': return '✗';
+                case 'green': return '✓';
+                case 'orange': return '●';
+                default: return '';
             }
         }
         
@@ -1239,8 +1286,17 @@
             if (typeof Chart === 'undefined') {
                 document.querySelector('.chart-container').innerHTML = '<p style="text-align:center; color:red;">Grafik tidak tersedia. Silakan periksa koneksi internet Anda.</p>';
             }
+            
+            // Set event listener untuk tombol warna
+            document.querySelectorAll('.color-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    selectedColor = e.target.dataset.color;
+                    showToast(`Warna terpilih: ${e.target.innerText}`);
+                });
+            });
+
+            // Panggil fungsi createChecklistTable saat halaman dimuat
             createChecklistTable();
-            loadChecklist();
             showSection('home');
         });
     </script>
