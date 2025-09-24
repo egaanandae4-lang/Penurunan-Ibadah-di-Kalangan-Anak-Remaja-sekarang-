@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -158,6 +157,21 @@
         button:hover {
             background: var(--hover-color);
         }
+
+        /* Gaya untuk tombol edit dan hapus */
+        button.edit-btn {
+            background: #27ae60;
+        }
+        button.delete-btn {
+            background: #e74c3c;
+        }
+        button.edit-btn:hover {
+            background: #229954;
+        }
+        button.delete-btn:hover {
+            background: #c0392b;
+        }
+
         .theme-toggle {
             position: fixed;
             bottom: 20px;
@@ -655,6 +669,20 @@
             margin-top: 5px;
         }
 
+        /* Gaya untuk Quiz */
+        #quiz-container {
+            text-align: left;
+        }
+        .quiz-item {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .quiz-item label {
+            display: block;
+            margin-top: 5px;
+        }
+
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -682,6 +710,7 @@
                 <li onclick="showSection('table')"><i class="fas fa-table"></i> Tabel Data</li>
                 <li onclick="showSection('checklist')"><i class="fas fa-clipboard-check"></i> Checklist 40 Hari</li>
                 <li onclick="showSection('journal')"><i class="fas fa-book"></i> Jurnal Ibadah</li>
+                <li onclick="showSection('quiz')"><i class="fas fa-question-circle"></i> Kuis Harian</li>
                 <li onclick="showSection('forum')"><i class="fas fa-comments"></i> Forum Remaja</li>
                 <li onclick="showSection('achievements')"><i class="fas fa-trophy"></i> Pencapaian</li>
                 <li onclick="showSection('tips')"><i class="fas fa-lightbulb"></i> Trik & Tips</li>
@@ -773,6 +802,7 @@
                                 <th>Persentase Remaja Rutin Ibadah (%)</th>
                                 <th>Faktor Penyebab Penurunan</th>
                                 <th>Saran Solusi</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -815,12 +845,38 @@
                 <section id="journal-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2><i class="fas fa-book"></i> Jurnal Ibadah Harian</h2>
-                    <p style="text-align: center;">Catat refleksi dan pengalaman ibadahmu hari ini. Ini bisa membantumu melihat progres dan bersyukur.</p>
-                    <textarea id="journal-text" placeholder="Ceritakan bagaimana ibadahmu hari ini..."></textarea>
-                    <div style="text-align: center;">
-                        <button onclick="saveJournal()">Simpan Jurnal</button>
+                    <p style="text-align: center;">Catat ibadahmu hari ini dan dapatkan poin!</p>
+                    
+                    <div class="container" style="margin-bottom: 20px;">
+                        <h3>Tambah Ibadah Baru</h3>
+                        <label for="ibadah-select">Pilih Ibadah:</label>
+                        <select id="ibadah-select" class="filter-select">
+                            <option value="Sholat Fardhu">Sholat Fardhu</option>
+                            <option value="Sholat Sunnah">Sholat Sunnah</option>
+                            <option value="Baca Al-Quran">Baca Al-Quran</option>
+                            <option value="Sedekah">Sedekah</option>
+                            <option value="Puasa Sunnah">Puasa Sunnah</option>
+                            <option value="Lain-lain">Lain-lain</option>
+                        </select>
+                        <br>
+                        <label for="ibadah-detail" style="display: block; margin-top: 10px;">Detail (opsional):</label>
+                        <textarea id="ibadah-detail" placeholder="Contoh: Sholat Dhuha 2 rakaat, Baca 2 halaman juz 30" style="width: 100%; height: 80px;"></textarea>
+                        <button onclick="addIbadah()">Tambahkan</button>
                     </div>
-                    <div id="journal-list">
+
+                    <div class="container">
+                        <h3>Poin Ibadahmu: <span id="ibadah-points">0</span> Poin</h3>
+                        <div id="journal-list">
+                            </div>
+                    </div>
+                </section>
+
+                <section id="quiz-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2><i class="fas fa-question-circle"></i> Kuis Harian</h2>
+                    <p style="text-align: center;">Uji pengetahuanmu dan dapatkan poin tambahan!</p>
+                    
+                    <div class="container" id="quiz-container">
                         </div>
                 </section>
 
@@ -1286,16 +1342,52 @@
             myChart.data.datasets[0].data = filteredData.map(item => item.percentage);
             myChart.update();
         }
+
+        // Fungsi untuk mengedit data
+        function editData(index) {
+            const item = database[index];
+            const newYear = prompt('Masukkan Tahun Baru:', item.year);
+            const newPercentage = prompt('Masukkan Persentase Baru:', item.percentage);
+            const newFactor = prompt('Masukkan Faktor Baru:', item.factor);
+            const newSolution = prompt('Masukkan Saran Solusi Baru:', item.solution);
+
+            if (newYear && newPercentage && newFactor && newSolution) {
+                database[index] = {
+                    year: parseInt(newYear),
+                    percentage: parseInt(newPercentage),
+                    factor: newFactor,
+                    solution: newSolution
+                };
+                updateData();
+                renderTable();
+                showToast('Data berhasil diperbarui!');
+            }
+        }
+
+        // Fungsi untuk menghapus data
+        function deleteData(index) {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                database.splice(index, 1);
+                updateData();
+                renderTable();
+                showToast('Data berhasil dihapus!');
+            }
+        }
+
         function renderTable() {
             const tableBody = document.querySelector('#dataTable tbody');
             tableBody.innerHTML = '';
-            database.forEach(item => {
+            database.forEach((item, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${item.year}</td>
                     <td>${item.percentage}%</td>
                     <td>${item.factor}</td>
                     <td>${item.solution}</td>
+                    <td>
+                        <button class="edit-btn" onclick="editData(${index})"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="delete-btn" onclick="deleteData(${index})"><i class="fas fa-trash"></i> Hapus</button>
+                    </td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -1315,6 +1407,8 @@
                 loadJournal();
             } else if (section === 'achievements') {
                 checkAchievements();
+            } else if (section === 'quiz') {
+                showQuiz();
             }
         }
         function showGoogleSearchResults() {
@@ -1394,7 +1488,6 @@
                 for (let i = 1; i <= 40; i++) {
                     const cell = document.createElement('td');
                     cell.id = `${sholat.toLowerCase()}-day-${i}`;
-                    cell.innerText = '';
                     cell.classList.add('checklist-cell');
                     cell.addEventListener('click', () => handleChecklistChange(sholat, i));
                     row.appendChild(cell);
@@ -1469,49 +1562,72 @@
             }
         }
 
-        // FUNGSI JURNAL
+        // FUNGSI JURNAL DAN POIN
+        const ibadahPoints = {
+            'Sholat Fardhu': 10,
+            'Sholat Sunnah': 5,
+            'Baca Al-Quran': 15,
+            'Sedekah': 20,
+            'Puasa Sunnah': 25,
+            'Lain-lain': 5
+        };
         const journalStorageKey = 'ibadahJournal';
+        const pointsStorageKey = 'ibadahPoints';
         
-        // Perubahan di sini: Menambahkan ID unik ke setiap entri
-        function saveJournal() {
-            const journalText = document.getElementById('journal-text').value;
-            if (journalText.trim() === '') {
-                showToast('Jurnal tidak boleh kosong!');
-                return;
-            }
-            const date = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        function addIbadah() {
+            const ibadahType = document.getElementById('ibadah-select').value;
+            const ibadahDetail = document.getElementById('ibadah-detail').value;
+            const points = ibadahPoints[ibadahType] || 0;
+            
             const newEntry = {
-                id: Date.now(), // Menambahkan ID unik
-                date: date,
-                content: journalText
+                id: Date.now(),
+                date: new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+                type: ibadahType,
+                detail: ibadahDetail,
+                points: points
             };
+            
             let savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
             savedEntries.unshift(newEntry);
             localStorage.setItem(journalStorageKey, JSON.stringify(savedEntries));
-            document.getElementById('journal-text').value = '';
-            showToast('Jurnal berhasil disimpan!');
+            
+            // Update poin
+            let currentPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
+            currentPoints += points;
+            localStorage.setItem(pointsStorageKey, currentPoints);
+
+            document.getElementById('ibadah-detail').value = '';
+            showToast(`Berhasil menambahkan ibadah. Kamu dapat ${points} poin!`);
             loadJournal();
             checkAchievements();
         }
 
-        // Perubahan di sini: Mengubah tampilan untuk menyertakan tombol edit/hapus
         function loadJournal() {
             const journalList = document.getElementById('journal-list');
             journalList.innerHTML = '';
+            
+            // Tampilkan total poin
+            const totalPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
+            document.getElementById('ibadah-points').innerText = totalPoints;
+
             const savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
             if (savedEntries.length === 0) {
                 journalList.innerHTML = '<p style="text-align: center;">Belum ada entri jurnal.</p>';
                 return;
             }
+            
             savedEntries.forEach(entry => {
                 const entryDiv = document.createElement('div');
                 entryDiv.classList.add('journal-entry');
-                entryDiv.setAttribute('data-id', entry.id); // Menambahkan data-id ke elemen div
+                entryDiv.setAttribute('data-id', entry.id);
+                
+                let detailHtml = entry.detail ? `<p><strong>Detail:</strong> ${entry.detail}</p>` : '';
+
                 entryDiv.innerHTML = `
                     <h4><i class="fas fa-calendar-alt"></i> ${entry.date}</h4>
-                    <p>${entry.content}</p>
+                    <p><strong>Ibadah:</strong> ${entry.type} (+${entry.points} poin)</p>
+                    ${detailHtml}
                     <div class="journal-entry-actions">
-                        <button class="edit-btn" onclick="editJournal(${entry.id})"><i class="fas fa-edit"></i> Edit</button>
                         <button class="delete-btn" onclick="deleteJournal(${entry.id})"><i class="fas fa-trash"></i> Hapus</button>
                     </div>
                 `;
@@ -1519,64 +1635,166 @@
             });
         }
         
-        // FUNGSI BARU: Hapus Jurnal
         function deleteJournal(id) {
             if (confirm('Apakah Anda yakin ingin menghapus entri jurnal ini?')) {
                 let savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
+                const entryToDelete = savedEntries.find(entry => entry.id === id);
+                
+                if (entryToDelete) {
+                    let currentPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
+                    currentPoints -= entryToDelete.points;
+                    localStorage.setItem(pointsStorageKey, currentPoints);
+                }
+                
                 savedEntries = savedEntries.filter(entry => entry.id !== id);
                 localStorage.setItem(journalStorageKey, JSON.stringify(savedEntries));
                 showToast('Jurnal berhasil dihapus!');
                 loadJournal();
+                checkAchievements();
             }
         }
+        
+        // FUNGSI QUIZ
+        const quizDataByDate = {
+            '2025-09-24': [ // Kuis Hari 1
+                {
+                    question: "Berapa kali sholat fardhu dalam sehari semalam?",
+                    answers: { a: "3 kali", b: "5 kali", c: "7 kali" },
+                    correctAnswer: "b",
+                    points: 20
+                },
+                {
+                    question: "Siapakah Nabi yang dijuluki 'Bapak Para Nabi'?",
+                    answers: { a: "Nabi Musa a.s.", b: "Nabi Isa a.s.", c: "Nabi Ibrahim a.s." },
+                    correctAnswer: "c",
+                    points: 20
+                },
+                {
+                    question: "Rukun Islam yang pertama adalah?",
+                    answers: { a: "Membaca syahadat", b: "Sholat", c: "Puasa" },
+                    correctAnswer: "a",
+                    points: 20
+                }
+            ],
+            '2025-09-25': [ // Kuis Hari 2
+                {
+                    question: "Malaikat yang bertugas mencatat amal baik manusia adalah?",
+                    answers: { a: "Malik", b: "Raqib", c: "Munkar" },
+                    correctAnswer: "b",
+                    points: 20
+                },
+                {
+                    question: "Sebutkan nama masjid yang pertama kali dibangun di Madinah!",
+                    answers: { a: "Masjid Nabawi", b: "Masjidil Haram", c: "Masjid Quba" },
+                    correctAnswer: "c",
+                    points: 20
+                },
+                {
+                    question: "Bulan apa umat Islam wajib berpuasa?",
+                    answers: { a: "Ramadhan", b: "Syawal", c: "Rajab" },
+                    correctAnswer: "a",
+                    points: 20
+                }
+            ],
+            '2025-09-26': [ // Kuis Hari 3
+                {
+                    question: "Berapa jumlah rukun sholat?",
+                    answers: { a: "10", b: "13", c: "15" },
+                    correctAnswer: "b",
+                    points: 20
+                },
+                {
+                    question: "Siapakah istri pertama Nabi Muhammad ﷺ?",
+                    answers: { a: "Aisyah", b: "Khadijah", c: "Fatimah" },
+                    correctAnswer: "b",
+                    points: 20
+                },
+                {
+                    question: "Sikap saat mendengar adzan adalah?",
+                    answers: { a: "Berlari", b: "Mengobrol", c: "Diam dan menjawabnya" },
+                    correctAnswer: "c",
+                    points: 20
+                }
+            ]
+        };
 
-        // FUNGSI BARU: Edit Jurnal (mode edit)
-        function editJournal(id) {
-            const entryElement = document.querySelector(`.journal-entry[data-id="${id}"]`);
-            if (!entryElement) return;
-
-            const savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
-            const entryToEdit = savedEntries.find(entry => entry.id === id);
-            if (!entryToEdit) return;
-
-            const contentElement = entryElement.querySelector('p');
-            const actionsElement = entryElement.querySelector('.journal-entry-actions');
-
-            // Ganti paragraf dengan textarea untuk diedit
-            contentElement.innerHTML = `
-                <textarea id="edit-textarea-${id}" style="width: 100%; height: 150px; padding: 10px; box-sizing: border-box;">${entryToEdit.content}</textarea>
-            `;
-
-            // Ganti tombol Edit/Hapus dengan Simpan/Batal
-            actionsElement.innerHTML = `
-                <button class="save-btn" onclick="saveEditedJournal(${id})"><i class="fas fa-save"></i> Simpan</button>
-                <button class="cancel-btn" onclick="loadJournal()"><i class="fas fa-times"></i> Batal</button>
-            `;
+        function showQuiz() {
+            const quizContainer = document.getElementById('quiz-container');
+            quizContainer.innerHTML = '';
             
-            document.getElementById(`edit-textarea-${id}`).focus();
+            // Ambil tanggal hari ini dalam format YYYY-MM-DD
+            const today = new Date().toISOString().slice(0, 10);
+            
+            // Pilih set kuis berdasarkan tanggal hari ini
+            const currentQuizData = quizDataByDate[today] || quizDataByDate['2025-09-24'];
+            
+            currentQuizData.forEach((quiz, index) => {
+                const quizDiv = document.createElement('div');
+                quizDiv.classList.add('quiz-item');
+                
+                let answersHtml = Object.keys(quiz.answers).map(key => `
+                    <label>
+                        <input type="radio" name="question${index}" value="${key}">
+                        ${quiz.answers[key]}
+                    </label><br>
+                `).join('');
+
+                quizDiv.innerHTML = `
+                    <p><strong>${index + 1}. ${quiz.question}</strong></p>
+                    <form id="quiz-form-${index}">${answersHtml}</form>
+                `;
+                quizContainer.appendChild(quizDiv);
+            });
+
+            const submitButton = document.createElement('button');
+            submitButton.innerText = 'Selesai Kuis';
+            submitButton.onclick = () => submitQuiz(currentQuizData);
+            quizContainer.appendChild(submitButton);
         }
 
-        // FUNGSI BARU: Simpan Jurnal yang telah diedit
-        function saveEditedJournal(id) {
-            const textarea = document.getElementById(`edit-textarea-${id}`);
-            const newContent = textarea.value;
+        function submitQuiz(quizData) {
+            let score = 0;
+            let totalPoints = 0;
+            let allCorrect = true;
 
-            if (newContent.trim() === '') {
-                showToast('Jurnal tidak boleh kosong!');
-                return;
+            quizData.forEach((quiz, index) => {
+                const form = document.getElementById(`quiz-form-${index}`);
+                const selectedAnswer = form.querySelector(`input[name="question${index}"]:checked`);
+                
+                if (selectedAnswer && selectedAnswer.value === quiz.correctAnswer) {
+                    score++;
+                    totalPoints += quiz.points;
+                } else {
+                    allCorrect = false;
+                }
+            });
+
+            let currentPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
+            currentPoints += totalPoints;
+            localStorage.setItem(pointsStorageKey, currentPoints);
+
+            showToast(`Kamu mendapatkan ${totalPoints} poin dari kuis ini!`);
+            
+            if (allCorrect) {
+                let achievements = JSON.parse(localStorage.getItem(achievementsStorageKey)) || {};
+                if (!achievements.quizMaster) {
+                    achievements.quizMaster = true;
+                    localStorage.setItem(achievementsStorageKey, JSON.stringify(achievements));
+                    showNotification('Pencapaian Baru!', 'Selamat! Kamu berhasil menjawab semua kuis dengan benar. Lencana "Quiz Master" telah terbuka.');
+                }
             }
+            
+            const quizContainer = document.getElementById('quiz-container');
+            quizContainer.innerHTML = `
+                <h3>Hasil Kuis</h3>
+                <p>Kamu berhasil menjawab <strong>${score} dari ${quizData.length}</strong> pertanyaan dengan benar.</p>
+                <p>Total poin yang kamu dapatkan: <strong>${totalPoints}</strong></p>
+                <button onclick="showQuiz()">Ulangi Kuis</button>
+            `;
 
-            let savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
-            const entryIndex = savedEntries.findIndex(entry => entry.id === id);
-
-            if (entryIndex !== -1) {
-                savedEntries[entryIndex].content = newContent;
-                localStorage.setItem(journalStorageKey, JSON.stringify(savedEntries));
-                showToast('Jurnal berhasil diperbarui!');
-                loadJournal();
-            }
+            loadJournal();
+            updateAchievementsDisplay();
         }
-
 
         // FUNGSI PENCAPAIAN
         const achievementsStorageKey = 'ibadahAchievements';
@@ -1584,6 +1802,7 @@
             let achievements = JSON.parse(localStorage.getItem(achievementsStorageKey)) || {};
             const checklistData = JSON.parse(localStorage.getItem(checklistStorageKey)) || {};
             const journalEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
+            const totalPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
 
             // Pencapaian Hari Pertama
             if (!achievements.firstDay && checklistData['subuh'] && Object.values(checklistData['subuh']).some(val => val === 'green' || val === 'orange')) {
@@ -1611,10 +1830,16 @@
                 showNotification('40 Hari Sempurna!', 'Alhamdulillah! Kamu berhasil menuntaskan tantangan 40 hari. Semoga menjadi kebiasaan selamanya.');
             }
 
-            // Pencapaian Jurnal Pertama
+            // Pencapaian Jurnal Pertama (diubah untuk cek entri ibadah)
             if (!achievements.firstJournal && journalEntries.length > 0) {
                 achievements.firstJournal = true;
-                showNotification('Jurnal Pertama', 'Selamat! Jurnal pertamamu berhasil disimpan.');
+                showNotification('Jurnal Pertama', 'Selamat! Jurnal ibadah pertamamu berhasil disimpan.');
+            }
+            
+            // Pencapaian Quiz Master (placeholder untuk fitur poin)
+            if (!achievements.quizMaster && totalPoints >= 100) {
+                 achievements.quizMaster = true;
+                 showNotification('Master Poin!', 'Selamat! Kamu telah mencapai 100 poin. Teruslah beribadah!');
             }
             
             localStorage.setItem(achievementsStorageKey, JSON.stringify(achievements));
@@ -1652,7 +1877,7 @@
             document.getElementById('badge-10-days').classList.toggle('unlocked', achievements['10Days']);
             document.getElementById('badge-40-days').classList.toggle('unlocked', achievements['40Days']);
             document.getElementById('badge-first-journal').classList.toggle('unlocked', achievements.firstJournal);
-            document.getElementById('badge-quiz-master').classList.toggle('unlocked', achievements.quizMaster); // Placeholder
+            document.getElementById('badge-quiz-master').classList.toggle('unlocked', achievements.quizMaster); 
         }
 
         // FUNGSI NOTIFIKASI SIMULASI
@@ -1685,9 +1910,6 @@
             }, delay);
         }
         
-        // Panggil fungsi pengingat saat halaman dimuat
-        // setPrayerReminder('Zuhur', 5000); // Contoh: Notifikasi muncul setelah 5 detik
-
         document.addEventListener('DOMContentLoaded', () => {
             const searchResultsSection = document.getElementById('search-results-section');
             if (searchResultsSection) {
@@ -1710,4 +1932,3 @@
     </script>
 </body>
 </html>
-
