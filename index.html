@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard: Data Penurunan Ibadah Anak Remaja</title>
+    <title>Dashboard Ibadah Remaja</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -19,9 +19,8 @@
             --bg-color: #2c3e50;
             --container-bg: #34495e;
             --text-color: #ecf0f1;
+            --accent-color: #3498db;
         }
-
-        /* Gaya Dasar */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -492,6 +491,148 @@
                 gap: 10px;
             }
         }
+
+        /* Gaya untuk Jurnal Harian */
+        #journal-section textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box;
+            background: var(--container-bg);
+            color: var(--text-color);
+        }
+        #journal-section button {
+            margin-top: 10px;
+        }
+        #journal-list {
+            margin-top: 20px;
+        }
+        .journal-entry {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+            margin-bottom: 10px;
+        }
+        .journal-entry h4 {
+            margin: 0;
+            font-size: 1.1em;
+            color: var(--accent-color);
+        }
+        .journal-entry p {
+            margin: 5px 0 0;
+        }
+
+        /* Gaya untuk Forum Diskusi */
+        .forum-post {
+            background: #f1f1f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .forum-post .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+            color: #777;
+            margin-bottom: 10px;
+        }
+        .forum-post .post-body h4 {
+            margin-top: 0;
+        }
+        .forum-post .post-body p {
+            margin-bottom: 0;
+        }
+        .forum-post .comments {
+            margin-top: 15px;
+            padding-left: 20px;
+            border-left: 2px solid var(--accent-color);
+        }
+        .forum-post .comment {
+            background: #e9e9e9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        [data-theme="dark"] .forum-post {
+            background: #4a6176;
+        }
+        [data-theme="dark"] .forum-post .comment {
+            background: #556c82;
+        }
+
+        /* Gaya Notifikasi Simulasi */
+        .notification-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #27ae60;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1002;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+        .notification-container.hidden {
+            animation: slideOut 0.5s ease-in forwards;
+        }
+        .notification-container h4 {
+            margin: 0 0 5px;
+        }
+        .notification-container p {
+            margin: 0;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Gaya untuk badge */
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .badge {
+            text-align: center;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+        .badge.unlocked {
+            opacity: 1;
+        }
+        .badge i {
+            font-size: 3em;
+            color: #f1c40f;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        .badge p {
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -504,6 +645,11 @@
     </div>
     <div id="toast"></div>
 
+    <div id="prayer-notification" class="notification-container">
+        <h4><i class="fas fa-bell"></i> Waktu Sholat Tiba!</h4>
+        <p>Ayo, segera tunaikan sholat <span id="prayer-name"></span>.</p>
+    </div>
+
     <div class="dashboard">
         <nav class="sidebar">
             <h2><i class="fas fa-chart-line"></i> Dashboard</h2>
@@ -513,8 +659,11 @@
                 <li onclick="showSection('chart')"><i class="fas fa-chart-line"></i> Grafik</li>
                 <li onclick="showSection('table')"><i class="fas fa-table"></i> Tabel Data</li>
                 <li onclick="showSection('checklist')"><i class="fas fa-clipboard-check"></i> Checklist 40 Hari</li>
+                <li onclick="showSection('journal')"><i class="fas fa-book"></i> Jurnal Ibadah</li>
+                <li onclick="showSection('forum')"><i class="fas fa-comments"></i> Forum Remaja</li>
+                <li onclick="showSection('achievements')"><i class="fas fa-trophy"></i> Pencapaian</li>
                 <li onclick="showSection('tips')"><i class="fas fa-lightbulb"></i> Trik & Tips</li>
-                <li onclick="showSection('doa')"><i class="fas fa-pray"></i> Doa & Bacaan Sholat</li>
+                <li onclick="showSection('doa')"><i class="fas fa-pray"></i> Doa & Bacaan</li>
                 <li onclick="showSection('gerakan-sholat')"><i class="fas fa-mosque"></i> Gerakan Sholat</li>
                 <li onclick="showSection('wudhu')"><i class="fas fa-hand-holding-water"></i> Wudhu</li>
                 <li onclick="showSection('hadis')"><i class="fas fa-book-open"></i> Hadis</li>
@@ -640,6 +789,86 @@
                         <button onclick="clearChecklist()">Reset Checklist</button>
                     </div>
                 </section>
+                
+                <section id="journal-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2><i class="fas fa-book"></i> Jurnal Ibadah Harian</h2>
+                    <p style="text-align: center;">Catat refleksi dan pengalaman ibadahmu hari ini. Ini bisa membantumu melihat progres dan bersyukur.</p>
+                    <textarea id="journal-text" placeholder="Ceritakan bagaimana ibadahmu hari ini..."></textarea>
+                    <div style="text-align: center;">
+                        <button onclick="saveJournal()">Simpan Jurnal</button>
+                    </div>
+                    <div id="journal-list">
+                        </div>
+                </section>
+
+                <section id="forum-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2><i class="fas fa-comments"></i> Forum Remaja</h2>
+                    <p style="text-align: center;">Tempat berbagi, bertanya, dan saling menyemangati. Fitur ini adalah simulasi dari forum komunitas.</p>
+                    <div class="forum-post">
+                        <div class="post-header">
+                            <span>Oleh: Budi</span>
+                            <span>3 jam lalu</span>
+                        </div>
+                        <div class="post-body">
+                            <h4>"Bagaimana cara konsisten baca Al-Quran setiap hari?"</h4>
+                            <p>Saya sering semangat di awal, tapi sulit konsisten. Ada tips dari teman-teman di sini?</p>
+                        </div>
+                        <div class="comments">
+                            <div class="comment">
+                                <strong>Ria:</strong> Coba mulai dari 1 ayat saja, jangan langsung banyak. Yang penting rutin!
+                            </div>
+                            <div class="comment">
+                                <strong>Ahmad:</strong> Setel alarm di HP, atau gabung grup tahsin online, biar ada yang ngingetin.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="forum-post">
+                        <div class="post-header">
+                            <span>Oleh: Siti</span>
+                            <span>1 hari lalu</span>
+                        </div>
+                        <div class="post-body">
+                            <h4>"Alhamdulillah, checklist 40 hari saya hampir penuh!"</h4>
+                            <p>Ternyata tantangannya seru. Doakan saya bisa selesai sampai 40 hari ya!</p>
+                        </div>
+                        <div class="comments">
+                            <div class="comment">
+                                <strong>Admin:</strong> Masya Allah! Selamat ya Siti, semoga istiqomah terus.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="achievements-section" style="display: none;">
+                    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    <h2><i class="fas fa-trophy"></i> Pencapaian & Hadiah</h2>
+                    <p style="text-align: center;">Raihlah pencapaian ini untuk menunjukkan komitmenmu dalam beribadah. Setiap pencapaian yang kamu raih akan memicu notifikasi.</p>
+                    <div class="badge-container">
+                        <div class="badge" id="badge-first-day">
+                            <i class="fas fa-sun"></i>
+                            <p>Hari Pertama</p>
+                        </div>
+                        <div class="badge" id="badge-10-days">
+                            <i class="fas fa-star"></i>
+                            <p>10 Hari Berturut-turut</p>
+                        </div>
+                        <div class="badge" id="badge-40-days">
+                            <i class="fas fa-medal"></i>
+                            <p>40 Hari Sempurna</p>
+                        </div>
+                        <div class="badge" id="badge-first-journal">
+                            <i class="fas fa-feather-alt"></i>
+                            <p>Jurnal Pertama</p>
+                        </div>
+                        <div class="badge" id="badge-quiz-master">
+                            <i class="fas fa-brain"></i>
+                            <p>Quiz Master</p>
+                        </div>
+                    </div>
+                </section>
+
 
                 <section id="tips-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
@@ -969,8 +1198,7 @@
             { year: 2023, percentage: 45, factor: 'Influence budaya pop & peer pressure', solution: 'Konseling remaja di masjid/gereja' },
             { year: 2024, percentage: 40, factor: 'AI & Metaverse distraction', solution: 'Workshop digital detox untuk remaja' }
         ];
-
-        const originalDatabase = JSON.parse(JSON.stringify(database)); // Salinan data asli untuk reset
+        const originalDatabase = JSON.parse(JSON.stringify(database));
         const allSections = document.querySelectorAll('main .container section');
         const noResultsMessage = document.getElementById('no-results');
 
@@ -996,77 +1224,49 @@
             }
         });
 
-        // Fungsi untuk mengupdate data ke simulasi 2024
+        // FUNGSI UMUM
         function updateData() {
-            // Data 2024 sudah ada di database awal, jadi fungsi ini tidak perlu menambahkannya lagi.
-            // Bisa digunakan untuk simulasi data di masa depan.
-            // Saat ini, fungsi ini hanya mengupdate tampilan saja.
-            
-            // Perbarui chart
             myChart.data.labels = database.map(item => item.year);
             myChart.data.datasets[0].data = database.map(item => item.percentage);
             myChart.update();
-
-            // Perbarui statistik
             const lastPercentage = database[database.length - 1].percentage;
             const firstPercentage = database[0].percentage;
             const decline = firstPercentage - lastPercentage;
             document.getElementById('penurunan').innerText = `${decline}% (dari ${firstPercentage}% ke ${lastPercentage}% rutin ibadah)`;
             document.getElementById('progress-penurunan').style.width = `${lastPercentage}%`;
-
-            // Atur ulang filter agar menampilkan semua data
             document.getElementById('yearFilter').value = 'all';
-
-            // Perbarui tampilan tabel dan statistik
             showToast('Data berhasil diupdate dengan simulasi 2024!');
             showSection('stats');
         }
-
-        // Fungsi untuk mereset data ke kondisi awal
         function resetData() {
-            // Kembalikan database ke data asli
             database = JSON.parse(JSON.stringify(originalDatabase));
-
-            // Perbarui chart
             myChart.data.labels = database.map(item => item.year);
             myChart.data.datasets[0].data = database.map(item => item.percentage);
             myChart.update();
-
-            // Perbarui statistik
             const lastPercentage = database[database.length - 1].percentage;
             const firstPercentage = database[0].percentage;
             const decline = firstPercentage - lastPercentage;
             document.getElementById('penurunan').innerText = `${decline}% (dari ${firstPercentage}% ke ${lastPercentage}% rutin ibadah)`;
             document.getElementById('progress-penurunan').style.width = `${lastPercentage}%`;
-
-            // Atur ulang filter agar menampilkan semua data
             document.getElementById('yearFilter').value = 'all';
-
             showToast('Data dikembalikan ke kondisi awal.');
             showSection('stats');
         }
-
-        // Fungsi untuk memfilter grafik berdasarkan tahun
         function filterChart() {
             const filter = document.getElementById('yearFilter').value;
             let filteredData = database;
-
             if (filter === '2020-2022') {
                 filteredData = database.filter(item => item.year >= 2020 && item.year <= 2022);
             } else if (filter === '2022-2024') {
                 filteredData = database.filter(item => item.year >= 2022);
             }
-
             myChart.data.labels = filteredData.map(item => item.year);
             myChart.data.datasets[0].data = filteredData.map(item => item.percentage);
             myChart.update();
         }
-
-        // Fungsi untuk merender tabel secara dinamis dari database
         function renderTable() {
             const tableBody = document.querySelector('#dataTable tbody');
-            tableBody.innerHTML = ''; // Kosongkan tabel yang ada
-
+            tableBody.innerHTML = '';
             database.forEach(item => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -1078,46 +1278,34 @@
                 tableBody.appendChild(row);
             });
         }
-        
-        // Fungsi untuk menampilkan bagian dashboard yang berbeda
         function showSection(section) {
-            // Sembunyikan semua section
             allSections.forEach(sec => {
                 sec.style.display = 'none';
             });
             noResultsMessage.style.display = 'none';
-            document.getElementById('search-results-section').style.display = 'none'; // Sembunyikan juga hasil pencarian
-
-            // Tampilkan section yang dipilih
+            document.getElementById('search-results-section').style.display = 'none';
             document.getElementById(`${section}-section`).style.display = 'block';
-
-            // Muat data checklist dan tabel saat section yang relevan ditampilkan
             if (section === 'checklist') {
                 createChecklistTable();
             } else if (section === 'table') {
                 renderTable();
+            } else if (section === 'journal') {
+                loadJournal();
+            } else if (section === 'achievements') {
+                checkAchievements();
             }
         }
-        
-        // Fungsi untuk menampilkan hasil pencarian Google
         function showGoogleSearchResults() {
-            // Sembunyikan semua section lain
             allSections.forEach(sec => {
                 sec.style.display = 'none';
             });
-            // Tampilkan section hasil pencarian
             document.getElementById('search-results-section').style.display = 'block';
         }
-
-        // Fungsi untuk mendeteksi perubahan pada search box Google
         window.onload = function() {
-            // Perbaikan agar search box tidak langsung menampilkan hasil kosong
             const searchBox = document.querySelector('.gsc-input');
             const searchResultsDiv = document.querySelector('.gsc-control-cse .gsc-results');
-            
             if (searchBox) {
                 searchBox.addEventListener('keyup', (event) => {
-                    // Cek apakah user telah mengetik sesuatu
                     if (event.target.value.length > 0) {
                         showGoogleSearchResults();
                         if (searchResultsDiv) {
@@ -1132,16 +1320,12 @@
                 });
             }
         };
-
-        // Fungsi untuk menampilkan notifikasi pop-up (toast)
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.innerText = message;
             toast.style.display = 'block';
             setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
-
-        // Fungsi untuk mengubah tema (mode gelap/terang)
         function toggleTheme() {
             const body = document.body;
             const isDarkMode = body.getAttribute('data-theme') === 'dark';
@@ -1150,8 +1334,6 @@
             document.querySelector('.theme-toggle button i').className = isDarkMode ? 'fas fa-moon' : 'fas fa-sun';
             document.querySelector('.theme-toggle button').innerText = isDarkMode ? 'Dark Mode' : 'Light Mode';
         }
-
-        // Fungsi untuk pratinjau foto yang diunggah
         function previewImage(event) {
             const file = event.target.files[0];
             if (file && file.type.startsWith('image/')) {
@@ -1165,11 +1347,8 @@
                 showToast('Mohon unggah file gambar yang valid.');
             }
         }
-        
-        // Fungsi untuk memutar audio
         function playAudio(audioId) {
             const audio = document.getElementById(audioId);
-            // Hentikan semua audio yang sedang diputar
             document.querySelectorAll('audio').forEach(a => {
                 if (a !== audio) {
                     a.pause();
@@ -1179,10 +1358,10 @@
             audio.play();
         }
 
-        // --- Fungsi untuk Fitur Checklist 40 Hari yang Baru ---
+        // FUNGSI CHECKLIST
         const sholatNames = ['Subuh', 'Zuhur', 'Ashar', 'Magrib', 'Isya'];
-        const storageKey = 'sholatChecklist40Hari';
-        let selectedColor = 'green'; // Default color
+        const checklistStorageKey = 'sholatChecklist40Hari';
+        let selectedColor = 'green';
 
         function createChecklistTable() {
             const checklistBody = document.getElementById('checklist-body');
@@ -1200,27 +1379,23 @@
                 }
                 checklistBody.appendChild(row);
             });
-            loadChecklist(); // Panggil load setelah tabel dibuat
+            loadChecklist();
         }
-
         function handleChecklistChange(sholat, day) {
             const cell = document.getElementById(`${sholat.toLowerCase()}-day-${day}`);
             const currentClass = Array.from(cell.classList).find(cls => ['green', 'orange', 'red'].includes(cls));
-
             if (currentClass) {
                 cell.classList.remove(currentClass);
             }
-
             if (currentClass !== selectedColor) {
                 cell.classList.add(selectedColor);
                 cell.innerText = getSymbol(selectedColor);
             } else {
                 cell.innerText = '';
             }
-
             saveChecklist();
+            checkAchievements();
         }
-
         function saveChecklist() {
             const checklistData = {};
             sholatNames.forEach(sholat => {
@@ -1231,12 +1406,11 @@
                     checklistData[sholat.toLowerCase()][i] = color || '';
                 }
             });
-            localStorage.setItem(storageKey, JSON.stringify(checklistData));
+            localStorage.setItem(checklistStorageKey, JSON.stringify(checklistData));
             showToast('Checklist berhasil disimpan!');
         }
-
         function loadChecklist() {
-            const savedData = localStorage.getItem(storageKey);
+            const savedData = localStorage.getItem(checklistStorageKey);
             if (savedData) {
                 const checklistData = JSON.parse(savedData);
                 sholatNames.forEach(sholat => {
@@ -1256,16 +1430,14 @@
                 });
             }
         }
-
         function clearChecklist() {
             if (confirm('Apakah Anda yakin ingin mereset semua checklist?')) {
-                localStorage.removeItem(storageKey);
+                localStorage.removeItem(checklistStorageKey);
                 createChecklistTable();
                 showToast('Checklist berhasil direset!');
+                checkAchievements();
             }
         }
-
-        // Fungsi tambahan untuk mendapatkan simbol
         function getSymbol(color) {
             switch (color) {
                 case 'red': return '✗';
@@ -1274,29 +1446,171 @@
                 default: return '';
             }
         }
+
+        // FUNGSI JURNAL
+        const journalStorageKey = 'ibadahJournal';
+        function saveJournal() {
+            const journalText = document.getElementById('journal-text').value;
+            if (journalText.trim() === '') {
+                showToast('Jurnal tidak boleh kosong!');
+                return;
+            }
+            const date = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const newEntry = { date: date, content: journalText };
+            let savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
+            savedEntries.unshift(newEntry);
+            localStorage.setItem(journalStorageKey, JSON.stringify(savedEntries));
+            document.getElementById('journal-text').value = '';
+            showToast('Jurnal berhasil disimpan!');
+            loadJournal();
+            checkAchievements();
+        }
+        function loadJournal() {
+            const journalList = document.getElementById('journal-list');
+            journalList.innerHTML = '';
+            const savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
+            if (savedEntries.length === 0) {
+                journalList.innerHTML = '<p style="text-align: center;">Belum ada entri jurnal.</p>';
+                return;
+            }
+            savedEntries.forEach(entry => {
+                const entryDiv = document.createElement('div');
+                entryDiv.classList.add('journal-entry');
+                entryDiv.innerHTML = `
+                    <h4><i class="fas fa-calendar-alt"></i> ${entry.date}</h4>
+                    <p>${entry.content}</p>
+                `;
+                journalList.appendChild(entryDiv);
+            });
+        }
+
+        // FUNGSI PENCAPAIAN
+        const achievementsStorageKey = 'ibadahAchievements';
+        function checkAchievements() {
+            let achievements = JSON.parse(localStorage.getItem(achievementsStorageKey)) || {};
+            const checklistData = JSON.parse(localStorage.getItem(checklistStorageKey)) || {};
+            const journalEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
+
+            // Pencapaian Hari Pertama
+            if (!achievements.firstDay && checklistData['subuh'] && Object.values(checklistData['subuh']).some(val => val === 'green' || val === 'orange')) {
+                achievements.firstDay = true;
+                showNotification('Hari Pertama', 'Selamat! Kamu telah berhasil melakukan ibadah pertamamu.');
+            }
+
+            // Pencapaian 10 Hari
+            const consecutiveDays = getLongestStreak();
+            if (!achievements['10Days'] && consecutiveDays >= 10) {
+                achievements['10Days'] = true;
+                showNotification('10 Hari Berturut-turut', 'Luar biasa! Kamu berhasil konsisten selama 10 hari.');
+            }
+
+            // Pencapaian 40 Hari Sempurna
+            let completed40Days = true;
+            for (let i = 1; i <= 40; i++) {
+                if (sholatNames.some(sholat => !checklistData[sholat.toLowerCase()][i])) {
+                    completed40Days = false;
+                    break;
+                }
+            }
+            if (!achievements['40Days'] && completed40Days) {
+                achievements['40Days'] = true;
+                showNotification('40 Hari Sempurna!', 'Alhamdulillah! Kamu berhasil menuntaskan tantangan 40 hari. Semoga menjadi kebiasaan selamanya.');
+            }
+
+            // Pencapaian Jurnal Pertama
+            if (!achievements.firstJournal && journalEntries.length > 0) {
+                achievements.firstJournal = true;
+                showNotification('Jurnal Pertama', 'Selamat! Jurnal pertamamu berhasil disimpan.');
+            }
+            
+            localStorage.setItem(achievementsStorageKey, JSON.stringify(achievements));
+            updateAchievementsDisplay();
+        }
+
+        function getLongestStreak() {
+            const checklistData = JSON.parse(localStorage.getItem(checklistStorageKey)) || {};
+            if (Object.keys(checklistData).length === 0) return 0;
+            
+            let maxStreak = 0;
+            let currentStreak = 0;
+            
+            for (let i = 1; i <= 40; i++) {
+                const allSholatChecked = sholatNames.every(sholat => {
+                    const status = checklistData[sholat.toLowerCase()][i];
+                    return status === 'green' || status === 'orange';
+                });
+                
+                if (allSholatChecked) {
+                    currentStreak++;
+                } else {
+                    if (currentStreak > maxStreak) {
+                        maxStreak = currentStreak;
+                    }
+                    currentStreak = 0;
+                }
+            }
+            return Math.max(maxStreak, currentStreak);
+        }
+
+        function updateAchievementsDisplay() {
+            const achievements = JSON.parse(localStorage.getItem(achievementsStorageKey)) || {};
+            document.getElementById('badge-first-day').classList.toggle('unlocked', achievements.firstDay);
+            document.getElementById('badge-10-days').classList.toggle('unlocked', achievements['10Days']);
+            document.getElementById('badge-40-days').classList.toggle('unlocked', achievements['40Days']);
+            document.getElementById('badge-first-journal').classList.toggle('unlocked', achievements.firstJournal);
+            document.getElementById('badge-quiz-master').classList.toggle('unlocked', achievements.quizMaster); // Placeholder
+        }
+
+        // FUNGSI NOTIFIKASI SIMULASI
+        function showNotification(title, message) {
+            const notif = document.getElementById('prayer-notification');
+            const notifTitle = notif.querySelector('h4');
+            const notifMessage = notif.querySelector('p');
+            
+            notifTitle.innerHTML = `<i class="fas fa-bell"></i> ${title}`;
+            notifMessage.innerText = message;
+            
+            notif.style.display = 'block';
+            notif.classList.remove('hidden');
+
+            setTimeout(() => {
+                notif.classList.add('hidden');
+            }, 5000);
+        }
+
+        // FUNGSI PENGINGAT SHOLAT SIMULASI
+        function setPrayerReminder(prayerName, delay) {
+            setTimeout(() => {
+                const prayerNotif = document.getElementById('prayer-notification');
+                prayerNotif.querySelector('#prayer-name').innerText = prayerName;
+                prayerNotif.style.display = 'block';
+                prayerNotif.classList.remove('hidden');
+                setTimeout(() => {
+                    prayerNotif.classList.add('hidden');
+                }, 5000);
+            }, delay);
+        }
         
-        // Memastikan search results section disembunyikan saat halaman dimuat
+        // Panggil fungsi pengingat saat halaman dimuat
+        // setPrayerReminder('Zuhur', 5000); // Contoh: Notifikasi muncul setelah 5 detik
+
         document.addEventListener('DOMContentLoaded', () => {
             const searchResultsSection = document.getElementById('search-results-section');
             if (searchResultsSection) {
                 searchResultsSection.style.display = 'none';
             }
-
-            // Memastikan chart dan checklist dimuat
             if (typeof Chart === 'undefined') {
                 document.querySelector('.chart-container').innerHTML = '<p style="text-align:center; color:red;">Grafik tidak tersedia. Silakan periksa koneksi internet Anda.</p>';
             }
-            
-            // Set event listener untuk tombol warna
             document.querySelectorAll('.color-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     selectedColor = e.target.dataset.color;
                     showToast(`Warna terpilih: ${e.target.innerText}`);
                 });
             });
-
-            // Panggil fungsi createChecklistTable saat halaman dimuat
             createChecklistTable();
+            loadJournal();
+            updateAchievementsDisplay();
             showSection('home');
         });
     </script>
