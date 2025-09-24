@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -522,6 +523,27 @@
         }
         .journal-entry p {
             margin: 5px 0 0;
+        }
+        /* GAYA BARU UNTUK TOMBOL EDIT/HAPUS */
+        .journal-entry-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .journal-entry-actions button {
+            padding: 5px 10px;
+            font-size: 0.9em;
+        }
+        .journal-entry-actions button.edit-btn {
+            background-color: #3498db;
+        }
+        .journal-entry-actions button.delete-btn {
+            background-color: #e74c3c;
+        }
+        [data-theme="dark"] .journal-entry-actions button {
+            background-color: #556c82;
+            color: white;
         }
 
         /* Gaya untuk Forum Diskusi */
@@ -1449,6 +1471,8 @@
 
         // FUNGSI JURNAL
         const journalStorageKey = 'ibadahJournal';
+        
+        // Perubahan di sini: Menambahkan ID unik ke setiap entri
         function saveJournal() {
             const journalText = document.getElementById('journal-text').value;
             if (journalText.trim() === '') {
@@ -1456,7 +1480,11 @@
                 return;
             }
             const date = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            const newEntry = { date: date, content: journalText };
+            const newEntry = {
+                id: Date.now(), // Menambahkan ID unik
+                date: date,
+                content: journalText
+            };
             let savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
             savedEntries.unshift(newEntry);
             localStorage.setItem(journalStorageKey, JSON.stringify(savedEntries));
@@ -1465,6 +1493,8 @@
             loadJournal();
             checkAchievements();
         }
+
+        // Perubahan di sini: Mengubah tampilan untuk menyertakan tombol edit/hapus
         function loadJournal() {
             const journalList = document.getElementById('journal-list');
             journalList.innerHTML = '';
@@ -1476,13 +1506,77 @@
             savedEntries.forEach(entry => {
                 const entryDiv = document.createElement('div');
                 entryDiv.classList.add('journal-entry');
+                entryDiv.setAttribute('data-id', entry.id); // Menambahkan data-id ke elemen div
                 entryDiv.innerHTML = `
                     <h4><i class="fas fa-calendar-alt"></i> ${entry.date}</h4>
                     <p>${entry.content}</p>
+                    <div class="journal-entry-actions">
+                        <button class="edit-btn" onclick="editJournal(${entry.id})"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="delete-btn" onclick="deleteJournal(${entry.id})"><i class="fas fa-trash"></i> Hapus</button>
+                    </div>
                 `;
                 journalList.appendChild(entryDiv);
             });
         }
+        
+        // FUNGSI BARU: Hapus Jurnal
+        function deleteJournal(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus entri jurnal ini?')) {
+                let savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
+                savedEntries = savedEntries.filter(entry => entry.id !== id);
+                localStorage.setItem(journalStorageKey, JSON.stringify(savedEntries));
+                showToast('Jurnal berhasil dihapus!');
+                loadJournal();
+            }
+        }
+
+        // FUNGSI BARU: Edit Jurnal (mode edit)
+        function editJournal(id) {
+            const entryElement = document.querySelector(`.journal-entry[data-id="${id}"]`);
+            if (!entryElement) return;
+
+            const savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
+            const entryToEdit = savedEntries.find(entry => entry.id === id);
+            if (!entryToEdit) return;
+
+            const contentElement = entryElement.querySelector('p');
+            const actionsElement = entryElement.querySelector('.journal-entry-actions');
+
+            // Ganti paragraf dengan textarea untuk diedit
+            contentElement.innerHTML = `
+                <textarea id="edit-textarea-${id}" style="width: 100%; height: 150px; padding: 10px; box-sizing: border-box;">${entryToEdit.content}</textarea>
+            `;
+
+            // Ganti tombol Edit/Hapus dengan Simpan/Batal
+            actionsElement.innerHTML = `
+                <button class="save-btn" onclick="saveEditedJournal(${id})"><i class="fas fa-save"></i> Simpan</button>
+                <button class="cancel-btn" onclick="loadJournal()"><i class="fas fa-times"></i> Batal</button>
+            `;
+            
+            document.getElementById(`edit-textarea-${id}`).focus();
+        }
+
+        // FUNGSI BARU: Simpan Jurnal yang telah diedit
+        function saveEditedJournal(id) {
+            const textarea = document.getElementById(`edit-textarea-${id}`);
+            const newContent = textarea.value;
+
+            if (newContent.trim() === '') {
+                showToast('Jurnal tidak boleh kosong!');
+                return;
+            }
+
+            let savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
+            const entryIndex = savedEntries.findIndex(entry => entry.id === id);
+
+            if (entryIndex !== -1) {
+                savedEntries[entryIndex].content = newContent;
+                localStorage.setItem(journalStorageKey, JSON.stringify(savedEntries));
+                showToast('Jurnal berhasil diperbarui!');
+                loadJournal();
+            }
+        }
+
 
         // FUNGSI PENCAPAIAN
         const achievementsStorageKey = 'ibadahAchievements';
@@ -1616,3 +1710,4 @@
     </script>
 </body>
 </html>
+
