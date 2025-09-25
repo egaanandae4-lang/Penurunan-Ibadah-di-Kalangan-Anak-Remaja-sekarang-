@@ -720,6 +720,7 @@
                 <li onclick="showSection('hadis')"><i class="fas fa-book-open"></i> Hadis</li>
                 <li onclick="showSection('profile')"><i class="fas fa-user-circle"></i> Profil</li>
                 <li onclick="showSection('web')"><i class="fas fa-globe"></i> Web</li>
+                <li onclick="showSection('leaderboard')"><i class="fas fa-trophy"></i> Leaderboard Poin</li>
             </ul>
         </nav>
 
@@ -863,6 +864,7 @@
                         <textarea id="ibadah-detail" placeholder="Contoh: Sholat Dhuha 2 rakaat, Baca 2 halaman juz 30" style="width: 100%; height: 80px;"></textarea>
                         <button onclick="addIbadah()">Tambahkan</button>
                     </div>
+}
 
                     <div class="container">
                         <h3>Poin Ibadahmu: <span id="ibadah-points">0</span> Poin</h3>
@@ -946,6 +948,28 @@
                         </div>
                     </div>
                 </section>
+<section id="leaderboard-section" style="display: none;">
+    <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
+    <h2><i class="fas fa-trophy"></i> Leaderboard Poin Ibadah</h2>
+    <p style="text-align: center;">Bandingkan poin ibadahmu dengan remaja lainnya (Simulasi). Siapa yang paling konsisten?</p>
+    
+    <div class="container" style="padding: 10px; text-align: center; border: 2px solid var(--accent-color);">
+        <h4 style="color: var(--accent-color); margin: 5px;">Poin Saya Minggu Ini: <span id="current-user-points-weekly">0</span> Poin</h4>
+        <p style="font-size: 0.9em; margin: 5px;">Poin total ada di halaman Jurnal Ibadah.</p>
+    </div>
+
+    <table id="leaderboard-table" style="margin-top: 20px;">
+        <thead>
+            <tr>
+                <th style="width: 50px;">Rank</th>
+                <th>Nama Pengguna</th>
+                <th>Poin Minggu Ini</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+</section>
 
 
                 <section id="tips-section" style="display: none;">
@@ -1268,667 +1292,688 @@
     </div>
 
     <script>
-        // Data dashboard
-        let database = [
-            { year: 2020, percentage: 70, factor: 'Pandemi COVID-19 (kurang motivasi)', solution: 'Program online ibadah virtual' },
-            { year: 2021, percentage: 60, factor: 'Kenaikan penggunaan TikTok/Instagram', solution: 'Batasan screen time & reminder app' },
-            { year: 2022, percentage: 50, factor: 'Tekanan ujian sekolah & ekstrakurikuler', solution: 'Integrasi ibadah ke jadwal harian' },
-            { year: 2023, percentage: 45, factor: 'Influence budaya pop & peer pressure', solution: 'Konseling remaja di masjid/gereja' },
-            { year: 2024, percentage: 40, factor: 'AI & Metaverse distraction', solution: 'Workshop digital detox untuk remaja' }
-        ];
-        const originalDatabase = JSON.parse(JSON.stringify(database));
-        const allSections = document.querySelectorAll('main .container section');
-        const noResultsMessage = document.getElementById('no-results');
+    // Data dashboard
+    let database = [
+        { year: 2020, percentage: 70, factor: 'Pandemi COVID-19 (kurang motivasi)', solution: 'Program online ibadah virtual' },
+        { year: 2021, percentage: 60, factor: 'Kenaikan penggunaan TikTok/Instagram', solution: 'Batasan screen time & reminder app' },
+        { year: 2022, percentage: 50, factor: 'Tekanan ujian sekolah & ekstrakurikuler', solution: 'Integrasi ibadah ke jadwal harian' },
+        { year: 2023, percentage: 45, factor: 'Influence budaya pop & peer pressure', solution: 'Konseling remaja di masjid/gereja' },
+        { year: 2024, percentage: 40, factor: 'AI & Metaverse distraction', solution: 'Workshop digital detox untuk remaja' }
+    ];
+    const originalDatabase = JSON.parse(JSON.stringify(database));
+    const allSections = document.querySelectorAll('main .container section');
+    const noResultsMessage = document.getElementById('no-results');
 
-        // Inisialisasi Chart.js
-        const ctx = document.getElementById('myChart').getContext('2d');
-        const myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: database.map(item => item.year),
-                datasets: [{
-                    label: 'Persentase Rutin Ibadah (%)',
-                    data: database.map(item => item.percentage),
-                    borderColor: 'rgb(255, 99, 132)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true, max: 100 }
+    // Inisialisasi Chart.js
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: database.map(item => item.year),
+            datasets: [{
+                label: 'Persentase Rutin Ibadah (%)',
+                data: database.map(item => item.percentage),
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true, max: 100 }
+            }
+        }
+    });
+
+    // FUNGSI UMUM
+    function updateData() {
+        myChart.data.labels = database.map(item => item.year);
+        myChart.data.datasets[0].data = database.map(item => item.percentage);
+        myChart.update();
+        const lastPercentage = database[database.length - 1].percentage;
+        const firstPercentage = database[0].percentage;
+        const decline = firstPercentage - lastPercentage;
+        document.getElementById('penurunan').innerText = `${decline}% (dari ${firstPercentage}% ke ${lastPercentage}% rutin ibadah)`;
+        document.getElementById('progress-penurunan').style.width = `${lastPercentage}%`;
+        document.getElementById('yearFilter').value = 'all';
+        showToast('Data berhasil diupdate dengan simulasi 2024!');
+        showSection('stats');
+    }
+    function resetData() {
+        database = JSON.parse(JSON.stringify(originalDatabase));
+        myChart.data.labels = database.map(item => item.year);
+        myChart.data.datasets[0].data = database.map(item => item.percentage);
+        myChart.update();
+        const lastPercentage = database[database.length - 1].percentage;
+        const firstPercentage = database[0].percentage;
+        const decline = firstPercentage - lastPercentage;
+        document.getElementById('penurunan').innerText = `${decline}% (dari ${firstPercentage}% ke ${lastPercentage}% rutin ibadah)`;
+        document.getElementById('progress-penurunan').style.width = `${lastPercentage}%`;
+        document.getElementById('yearFilter').value = 'all';
+        showToast('Data dikembalikan ke kondisi awal.');
+        showSection('stats');
+    }
+    function filterChart() {
+        const filter = document.getElementById('yearFilter').value;
+        let filteredData = database;
+        if (filter === '2020-2022') {
+            filteredData = database.filter(item => item.year >= 2020 && item.year <= 2022);
+        } else if (filter === '2022-2024') {
+            filteredData = database.filter(item => item.year >= 2022);
+        }
+        myChart.data.labels = filteredData.map(item => item.year);
+        myChart.data.datasets[0].data = filteredData.map(item => item.percentage);
+        myChart.update();
+    }
+    function editData(index) {
+        const item = database[index];
+        const newYear = prompt('Masukkan Tahun Baru:', item.year);
+        const newPercentage = prompt('Masukkan Persentase Baru:', item.percentage);
+        const newFactor = prompt('Masukkan Faktor Baru:', item.factor);
+        const newSolution = prompt('Masukkan Saran Solusi Baru:', item.solution);
+
+        if (newYear && newPercentage && newFactor && newSolution) {
+            database[index] = {
+                year: parseInt(newYear),
+                percentage: parseInt(newPercentage),
+                factor: newFactor,
+                solution: newSolution
+            };
+            updateData();
+            renderTable();
+            showToast('Data berhasil diperbarui!');
+        }
+    }
+    function deleteData(index) {
+        if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+            database.splice(index, 1);
+            updateData();
+            renderTable();
+            showToast('Data berhasil dihapus!');
+        }
+    }
+    function renderTable() {
+        const tableBody = document.querySelector('#dataTable tbody');
+        tableBody.innerHTML = '';
+        database.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.year}</td>
+                <td>${item.percentage}%</td>
+                <td>${item.factor}</td>
+                <td>${item.solution}</td>
+                <td>
+                    <button class="edit-btn" onclick="editData(${index})"><i class="fas fa-edit"></i> Edit</button>
+                    <button class="delete-btn" onclick="deleteData(${index})"><i class="fas fa-trash"></i> Hapus</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+    function showSection(section) {
+        allSections.forEach(sec => {
+            sec.style.display = 'none';
+        });
+        noResultsMessage.style.display = 'none';
+        document.getElementById('search-results-section').style.display = 'none';
+        document.getElementById(`${section}-section`).style.display = 'block';
+        if (section === 'checklist') {
+            createChecklistTable();
+        } else if (section === 'table') {
+            renderTable();
+        } else if (section === 'journal') {
+            loadJournal();
+        } else if (section === 'achievements') {
+            checkAchievements();
+        } else if (section === 'quiz') {
+            showQuiz();
+        }
+    }
+    function showGoogleSearchResults() {
+        allSections.forEach(sec => {
+            sec.style.display = 'none';
+        });
+        document.getElementById('search-results-section').style.display = 'block';
+    }
+    window.onload = function() {
+        const searchBox = document.querySelector('.gsc-input');
+        const searchResultsDiv = document.querySelector('.gsc-control-cse .gsc-results');
+        if (searchBox) {
+            searchBox.addEventListener('keyup', (event) => {
+                if (event.target.value.length > 0) {
+                    showGoogleSearchResults();
+                    if (searchResultsDiv) {
+                       searchResultsDiv.style.display = 'block';
+                    }
+                } else {
+                    showSection('home');
+                    if (searchResultsDiv) {
+                       searchResultsDiv.style.display = 'none';
+                    }
                 }
+            });
+        }
+    };
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.innerText = message;
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+    function toggleTheme() {
+        const body = document.body;
+        const isDarkMode = body.getAttribute('data-theme') === 'dark';
+        const newTheme = isDarkMode ? 'light' : 'dark';
+        body.setAttribute('data-theme', newTheme);
+        document.querySelector('.theme-toggle button i').className = isDarkMode ? 'fas fa-moon' : 'fas fa-sun';
+        document.querySelector('.theme-toggle button').innerText = isDarkMode ? 'Dark Mode' : 'Light Mode';
+    }
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profile-picture').src = e.target.result;
+                showToast('Foto profil berhasil diperbarui!');
+            }
+            reader.readAsDataURL(file);
+        } else {
+            showToast('Mohon unggah file gambar yang valid.');
+        }
+    }
+    function playAudio(audioId) {
+        const audio = document.getElementById(audioId);
+        document.querySelectorAll('audio').forEach(a => {
+            if (a !== audio) {
+                a.pause();
+                a.currentTime = 0;
             }
         });
+        audio.play();
+    }
 
-        // FUNGSI UMUM
-        function updateData() {
-            myChart.data.labels = database.map(item => item.year);
-            myChart.data.datasets[0].data = database.map(item => item.percentage);
-            myChart.update();
-            const lastPercentage = database[database.length - 1].percentage;
-            const firstPercentage = database[0].percentage;
-            const decline = firstPercentage - lastPercentage;
-            document.getElementById('penurunan').innerText = `${decline}% (dari ${firstPercentage}% ke ${lastPercentage}% rutin ibadah)`;
-            document.getElementById('progress-penurunan').style.width = `${lastPercentage}%`;
-            document.getElementById('yearFilter').value = 'all';
-            showToast('Data berhasil diupdate dengan simulasi 2024!');
-            showSection('stats');
-        }
-        function resetData() {
-            database = JSON.parse(JSON.stringify(originalDatabase));
-            myChart.data.labels = database.map(item => item.year);
-            myChart.data.datasets[0].data = database.map(item => item.percentage);
-            myChart.update();
-            const lastPercentage = database[database.length - 1].percentage;
-            const firstPercentage = database[0].percentage;
-            const decline = firstPercentage - lastPercentage;
-            document.getElementById('penurunan').innerText = `${decline}% (dari ${firstPercentage}% ke ${lastPercentage}% rutin ibadah)`;
-            document.getElementById('progress-penurunan').style.width = `${lastPercentage}%`;
-            document.getElementById('yearFilter').value = 'all';
-            showToast('Data dikembalikan ke kondisi awal.');
-            showSection('stats');
-        }
-        function filterChart() {
-            const filter = document.getElementById('yearFilter').value;
-            let filteredData = database;
-            if (filter === '2020-2022') {
-                filteredData = database.filter(item => item.year >= 2020 && item.year <= 2022);
-            } else if (filter === '2022-2024') {
-                filteredData = database.filter(item => item.year >= 2022);
+    // FUNGSI CHECKLIST
+    const sholatNames = ['Subuh', 'Zuhur', 'Ashar', 'Magrib', 'Isya'];
+    const checklistStorageKey = 'sholatChecklist40Hari';
+    let selectedColor = 'green';
+
+    function createChecklistTable() {
+        const checklistBody = document.getElementById('checklist-body');
+        checklistBody.innerHTML = '';
+        sholatNames.forEach(sholat => {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td class="sticky left-0 bg-container-bg">${sholat}</td>`;
+            for (let i = 1; i <= 40; i++) {
+                const cell = document.createElement('td');
+                cell.id = `${sholat.toLowerCase()}-day-${i}`;
+                cell.classList.add('checklist-cell');
+                cell.addEventListener('click', () => handleChecklistChange(sholat, i));
+                row.appendChild(cell);
             }
-            myChart.data.labels = filteredData.map(item => item.year);
-            myChart.data.datasets[0].data = filteredData.map(item => item.percentage);
-            myChart.update();
-        }
+            checklistBody.appendChild(row);
+        });
+        loadChecklist();
+    }
+    function handleChecklistChange(sholat, day) {
+    const cell = document.getElementById(`${sholat.toLowerCase()}-day-${day}`);
+    const currentClass = Array.from(cell.classList).find(cls => ['green', 'orange', 'red'].includes(cls));
+    
+    // Simpan status lama sebelum diubah
+    const oldColor = currentClass;
 
-        // Fungsi untuk mengedit data
-        function editData(index) {
-            const item = database[index];
-            const newYear = prompt('Masukkan Tahun Baru:', item.year);
-            const newPercentage = prompt('Masukkan Persentase Baru:', item.percentage);
-            const newFactor = prompt('Masukkan Faktor Baru:', item.factor);
-            const newSolution = prompt('Masukkan Saran Solusi Baru:', item.solution);
+    // Hapus kelas warna yang ada
+    if (currentClass) {
+        cell.classList.remove(currentClass);
+    }
 
-            if (newYear && newPercentage && newFactor && newSolution) {
-                database[index] = {
-                    year: parseInt(newYear),
-                    percentage: parseInt(newPercentage),
-                    factor: newFactor,
-                    solution: newSolution
-                };
-                updateData();
-                renderTable();
-                showToast('Data berhasil diperbarui!');
+    // Tentukan warna baru
+    let newColor = '';
+    if (currentClass !== selectedColor) {
+        cell.classList.add(selectedColor);
+        cell.innerText = getSymbol(selectedColor);
+        newColor = selectedColor;
+    } else {
+        cell.innerText = '';
+    }
+
+    // --- LOGIKA PERUBAHAN POIN ---
+    const pointsToAdd = 20;
+    const pointsToSubtract = 50;
+    let currentPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
+
+    // 1. Logika penambahan poin (jika berubah ke hijau atau oranye)
+    const isNewColorValid = newColor === 'green' || newColor === 'orange';
+    const isOldColorValid = oldColor === 'green' || oldColor === 'orange';
+    
+    if (isNewColorValid && !isOldColorValid) {
+        currentPoints += pointsToAdd;
+        showToast(`Selamat! Kamu dapat ${pointsToAdd} poin untuk sholat ${sholat} di hari ${day}.`);
+    } 
+    // 2. Logika pengurangan poin (jika berubah ke merah)
+    // Poin akan berkurang jika sebelumnya bukan warna merah
+    else if (newColor === 'red' && oldColor !== 'red') {
+        currentPoints -= pointsToSubtract;
+        showToast(`Poin berkurang! ${pointsToSubtract} poin dikurangi untuk sholat ${sholat} di hari ${day}.`);
+    }
+
+    // Perbarui poin di penyimpanan lokal dan tampilan
+    localStorage.setItem(pointsStorageKey, currentPoints);
+    document.getElementById('ibadah-points').innerText = currentPoints;
+
+    saveChecklist();
+    checkAchievements();
+}
+
+    function saveChecklist() {
+        const checklistData = {};
+        sholatNames.forEach(sholat => {
+            checklistData[sholat.toLowerCase()] = {};
+            for (let i = 1; i <= 40; i++) {
+                const cell = document.getElementById(`${sholat.toLowerCase()}-day-${i}`);
+                const color = Array.from(cell.classList).find(cls => ['green', 'orange', 'red'].includes(cls));
+                checklistData[sholat.toLowerCase()][i] = color || '';
             }
-        }
-
-        // Fungsi untuk menghapus data
-        function deleteData(index) {
-            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                database.splice(index, 1);
-                updateData();
-                renderTable();
-                showToast('Data berhasil dihapus!');
-            }
-        }
-
-        function renderTable() {
-            const tableBody = document.querySelector('#dataTable tbody');
-            tableBody.innerHTML = '';
-            database.forEach((item, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.year}</td>
-                    <td>${item.percentage}%</td>
-                    <td>${item.factor}</td>
-                    <td>${item.solution}</td>
-                    <td>
-                        <button class="edit-btn" onclick="editData(${index})"><i class="fas fa-edit"></i> Edit</button>
-                        <button class="delete-btn" onclick="deleteData(${index})"><i class="fas fa-trash"></i> Hapus</button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-        function showSection(section) {
-            allSections.forEach(sec => {
-                sec.style.display = 'none';
-            });
-            noResultsMessage.style.display = 'none';
-            document.getElementById('search-results-section').style.display = 'none';
-            document.getElementById(`${section}-section`).style.display = 'block';
-            if (section === 'checklist') {
-                createChecklistTable();
-            } else if (section === 'table') {
-                renderTable();
-            } else if (section === 'journal') {
-                loadJournal();
-            } else if (section === 'achievements') {
-                checkAchievements();
-            } else if (section === 'quiz') {
-                showQuiz();
-            }
-        }
-        function showGoogleSearchResults() {
-            allSections.forEach(sec => {
-                sec.style.display = 'none';
-            });
-            document.getElementById('search-results-section').style.display = 'block';
-        }
-        window.onload = function() {
-            const searchBox = document.querySelector('.gsc-input');
-            const searchResultsDiv = document.querySelector('.gsc-control-cse .gsc-results');
-            if (searchBox) {
-                searchBox.addEventListener('keyup', (event) => {
-                    if (event.target.value.length > 0) {
-                        showGoogleSearchResults();
-                        if (searchResultsDiv) {
-                           searchResultsDiv.style.display = 'block';
-                        }
-                    } else {
-                        showSection('home');
-                        if (searchResultsDiv) {
-                           searchResultsDiv.style.display = 'none';
-                        }
-                    }
-                });
-            }
-        };
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.innerText = message;
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 3000);
-        }
-        function toggleTheme() {
-            const body = document.body;
-            const isDarkMode = body.getAttribute('data-theme') === 'dark';
-            const newTheme = isDarkMode ? 'light' : 'dark';
-            body.setAttribute('data-theme', newTheme);
-            document.querySelector('.theme-toggle button i').className = isDarkMode ? 'fas fa-moon' : 'fas fa-sun';
-            document.querySelector('.theme-toggle button').innerText = isDarkMode ? 'Dark Mode' : 'Light Mode';
-        }
-        function previewImage(event) {
-            const file = event.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('profile-picture').src = e.target.result;
-                    showToast('Foto profil berhasil diperbarui!');
-                }
-                reader.readAsDataURL(file);
-            } else {
-                showToast('Mohon unggah file gambar yang valid.');
-            }
-        }
-        function playAudio(audioId) {
-            const audio = document.getElementById(audioId);
-            document.querySelectorAll('audio').forEach(a => {
-                if (a !== audio) {
-                    a.pause();
-                    a.currentTime = 0;
-                }
-            });
-            audio.play();
-        }
-
-        // FUNGSI CHECKLIST
-        const sholatNames = ['Subuh', 'Zuhur', 'Ashar', 'Magrib', 'Isya'];
-        const checklistStorageKey = 'sholatChecklist40Hari';
-        let selectedColor = 'green';
-
-        function createChecklistTable() {
-            const checklistBody = document.getElementById('checklist-body');
-            checklistBody.innerHTML = '';
+        });
+        localStorage.setItem(checklistStorageKey, JSON.stringify(checklistData));
+        showToast('Checklist berhasil disimpan!');
+    }
+    function loadChecklist() {
+        const savedData = localStorage.getItem(checklistStorageKey);
+        if (savedData) {
+            const checklistData = JSON.parse(savedData);
             sholatNames.forEach(sholat => {
-                const row = document.createElement('tr');
-                row.innerHTML = `<td class="sticky left-0 bg-container-bg">${sholat}</td>`;
-                for (let i = 1; i <= 40; i++) {
-                    const cell = document.createElement('td');
-                    cell.id = `${sholat.toLowerCase()}-day-${i}`;
-                    cell.classList.add('checklist-cell');
-                    cell.addEventListener('click', () => handleChecklistChange(sholat, i));
-                    row.appendChild(cell);
-                }
-                checklistBody.appendChild(row);
-            });
-            loadChecklist();
-        }
-        function handleChecklistChange(sholat, day) {
-            const cell = document.getElementById(`${sholat.toLowerCase()}-day-${day}`);
-            const currentClass = Array.from(cell.classList).find(cls => ['green', 'orange', 'red'].includes(cls));
-            if (currentClass) {
-                cell.classList.remove(currentClass);
-            }
-            if (currentClass !== selectedColor) {
-                cell.classList.add(selectedColor);
-                cell.innerText = getSymbol(selectedColor);
-            } else {
-                cell.innerText = '';
-            }
-            saveChecklist();
-            checkAchievements();
-        }
-        function saveChecklist() {
-            const checklistData = {};
-            sholatNames.forEach(sholat => {
-                checklistData[sholat.toLowerCase()] = {};
                 for (let i = 1; i <= 40; i++) {
                     const cell = document.getElementById(`${sholat.toLowerCase()}-day-${i}`);
-                    const color = Array.from(cell.classList).find(cls => ['green', 'orange', 'red'].includes(cls));
-                    checklistData[sholat.toLowerCase()][i] = color || '';
-                }
-            });
-            localStorage.setItem(checklistStorageKey, JSON.stringify(checklistData));
-            showToast('Checklist berhasil disimpan!');
-        }
-        function loadChecklist() {
-            const savedData = localStorage.getItem(checklistStorageKey);
-            if (savedData) {
-                const checklistData = JSON.parse(savedData);
-                sholatNames.forEach(sholat => {
-                    for (let i = 1; i <= 40; i++) {
-                        const cell = document.getElementById(`${sholat.toLowerCase()}-day-${i}`);
-                        const color = checklistData[sholat.toLowerCase()][i];
-                        if (cell) {
-                            cell.classList.remove('green', 'orange', 'red');
-                            if (color) {
-                                cell.classList.add(color);
-                                cell.innerText = getSymbol(color);
-                            } else {
-                                cell.innerText = '';
-                            }
+                    const color = checklistData[sholat.toLowerCase()][i];
+                    if (cell) {
+                        cell.classList.remove('green', 'orange', 'red');
+                        if (color) {
+                            cell.classList.add(color);
+                            cell.innerText = getSymbol(color);
+                        } else {
+                            cell.innerText = '';
                         }
                     }
-                });
-            }
+                }
+            });
         }
-        function clearChecklist() {
-            if (confirm('Apakah Anda yakin ingin mereset semua checklist?')) {
-                localStorage.removeItem(checklistStorageKey);
-                createChecklistTable();
-                showToast('Checklist berhasil direset!');
-                checkAchievements();
-            }
+    }
+    function clearChecklist() {
+        if (confirm('Apakah Anda yakin ingin mereset semua checklist?')) {
+            localStorage.removeItem(checklistStorageKey);
+            createChecklistTable();
+            showToast('Checklist berhasil direset!');
+            checkAchievements();
         }
-        function getSymbol(color) {
-            switch (color) {
-                case 'red': return '✗';
-                case 'green': return '✓';
-                case 'orange': return '●';
-                default: return '';
-            }
+    }
+    function getSymbol(color) {
+        switch (color) {
+            case 'red': return '✗';
+            case 'green': return '✓';
+            case 'orange': return '●';
+            default: return '';
         }
+    }
 
-        // FUNGSI JURNAL DAN POIN
-        const ibadahPoints = {
-            'Sholat Fardhu': 10,
-            'Sholat Sunnah': 5,
-            'Baca Al-Quran': 15,
-            'Sedekah': 20,
-            'Puasa Sunnah': 25,
-            'Lain-lain': 5
-        };
-        const journalStorageKey = 'ibadahJournal';
-        const pointsStorageKey = 'ibadahPoints';
+    // FUNGSI JURNAL DAN POIN
+    const ibadahPoints = {
+        'Sholat Fardhu': 10,
+        'Sholat Sunnah': 5,
+        'Baca Al-Quran': 15,
+        'Sedekah': 20,
+        'Puasa Sunnah': 25,
+        'Lain-lain': 5
+    };
+    const journalStorageKey = 'ibadahJournal';
+    const pointsStorageKey = 'ibadahPoints';
+    
+    function addIbadah() {
+        const ibadahType = document.getElementById('ibadah-select').value;
+        const ibadahDetail = document.getElementById('ibadah-detail').value;
+        const points = ibadahPoints[ibadahType] || 0;
         
-        function addIbadah() {
-            const ibadahType = document.getElementById('ibadah-select').value;
-            const ibadahDetail = document.getElementById('ibadah-detail').value;
-            const points = ibadahPoints[ibadahType] || 0;
-            
-            const newEntry = {
-                id: Date.now(),
-                date: new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
-                type: ibadahType,
-                detail: ibadahDetail,
-                points: points
-            };
-            
-            let savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
-            savedEntries.unshift(newEntry);
-            localStorage.setItem(journalStorageKey, JSON.stringify(savedEntries));
-            
-            // Update poin
-            let currentPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
-            currentPoints += points;
-            localStorage.setItem(pointsStorageKey, currentPoints);
+        const newEntry = {
+            id: Date.now(),
+            date: new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+            type: ibadahType,
+            detail: ibadahDetail,
+            points: points
+        };
+        
+        let savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
+        savedEntries.unshift(newEntry);
+        localStorage.setItem(journalStorageKey, JSON.stringify(savedEntries));
+        
+        let currentPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
+        currentPoints += points;
+        localStorage.setItem(pointsStorageKey, currentPoints);
 
-            document.getElementById('ibadah-detail').value = '';
-            showToast(`Berhasil menambahkan ibadah. Kamu dapat ${points} poin!`);
+        document.getElementById('ibadah-detail').value = '';
+        showToast(`Berhasil menambahkan ibadah. Kamu dapat ${points} poin!`);
+        loadJournal();
+        checkAchievements();
+    }
+    function loadJournal() {
+        const journalList = document.getElementById('journal-list');
+        journalList.innerHTML = '';
+        
+        const totalPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
+        document.getElementById('ibadah-points').innerText = totalPoints;
+
+        const savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
+        if (savedEntries.length === 0) {
+            journalList.innerHTML = '<p style="text-align: center;">Belum ada entri jurnal.</p>';
+            return;
+        }
+        
+        savedEntries.forEach(entry => {
+            const entryDiv = document.createElement('div');
+            entryDiv.classList.add('journal-entry');
+            entryDiv.setAttribute('data-id', entry.id);
+            
+            let detailHtml = entry.detail ? `<p><strong>Detail:</strong> ${entry.detail}</p>` : '';
+
+            entryDiv.innerHTML = `
+                <h4><i class="fas fa-calendar-alt"></i> ${entry.date}</h4>
+                <p><strong>Ibadah:</strong> ${entry.type} (+${entry.points} poin)</p>
+                ${detailHtml}
+                <div class="journal-entry-actions">
+                    <button class="delete-btn" onclick="deleteJournal(${entry.id})"><i class="fas fa-trash"></i> Hapus</button>
+                </div>
+            `;
+            journalList.appendChild(entryDiv);
+        });
+    }
+    function deleteJournal(id) {
+        if (confirm('Apakah Anda yakin ingin menghapus entri jurnal ini?')) {
+            let savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
+            const entryToDelete = savedEntries.find(entry => entry.id === id);
+            
+            if (entryToDelete) {
+                let currentPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
+                currentPoints -= entryToDelete.points;
+                localStorage.setItem(pointsStorageKey, currentPoints);
+            }
+            
+            savedEntries = savedEntries.filter(entry => entry.id !== id);
+            localStorage.setItem(journalStorageKey, JSON.stringify(savedEntries));
+            showToast('Jurnal berhasil dihapus!');
             loadJournal();
             checkAchievements();
         }
-
-        function loadJournal() {
-            const journalList = document.getElementById('journal-list');
-            journalList.innerHTML = '';
-            
-            // Tampilkan total poin
-            const totalPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
-            document.getElementById('ibadah-points').innerText = totalPoints;
-
-            const savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
-            if (savedEntries.length === 0) {
-                journalList.innerHTML = '<p style="text-align: center;">Belum ada entri jurnal.</p>';
-                return;
+    }
+    
+    // FUNGSI QUIZ
+    const quizDataByDate = {
+        '2025-09-24': [
+            {
+                question: "Berapa kali sholat fardhu dalam sehari semalam?",
+                answers: { a: "3 kali", b: "5 kali", c: "7 kali" },
+                correctAnswer: "b",
+                points: 20
+            },
+            {
+                question: "Siapakah Nabi yang dijuluki 'Bapak Para Nabi'?",
+                answers: { a: "Nabi Musa a.s.", b: "Nabi Isa a.s.", c: "Nabi Ibrahim a.s." },
+                correctAnswer: "c",
+                points: 20
+            },
+            {
+                question: "Rukun Islam yang pertama adalah?",
+                answers: { a: "Membaca syahadat", b: "Sholat", c: "Puasa" },
+                correctAnswer: "a",
+                points: 20
             }
-            
-            savedEntries.forEach(entry => {
-                const entryDiv = document.createElement('div');
-                entryDiv.classList.add('journal-entry');
-                entryDiv.setAttribute('data-id', entry.id);
-                
-                let detailHtml = entry.detail ? `<p><strong>Detail:</strong> ${entry.detail}</p>` : '';
+        ],
+        '2025-09-25': [
+            {
+                question: "Malaikat yang bertugas mencatat amal baik manusia adalah?",
+                answers: { a: "Malik", b: "Raqib", c: "Munkar" },
+                correctAnswer: "b",
+                points: 20
+            },
+            {
+                question: "Sebutkan nama masjid yang pertama kali dibangun di Madinah!",
+                answers: { a: "Masjid Nabawi", b: "Masjidil Haram", c: "Masjid Quba" },
+                correctAnswer: "c",
+                points: 20
+            },
+            {
+                question: "Bulan apa umat Islam wajib berpuasa?",
+                answers: { a: "Ramadhan", b: "Syawal", c: "Rajab" },
+                correctAnswer: "a",
+                points: 20
+            }
+        ],
+        '2025-09-26': [
+            {
+                question: "Berapa jumlah rukun sholat?",
+                answers: { a: "10", b: "13", c: "15" },
+                correctAnswer: "b",
+                points: 20
+            },
+            {
+                question: "Siapakah istri pertama Nabi Muhammad ﷺ?",
+                answers: { a: "Aisyah", b: "Khadijah", c: "Fatimah" },
+                correctAnswer: "b",
+                points: 20
+            },
+            {
+                question: "Sikap saat mendengar adzan adalah?",
+                answers: { a: "Berlari", b: "Mengobrol", c: "Diam dan menjawabnya" },
+                correctAnswer: "c",
+                points: 20
+            }
+        ]
+    };
 
-                entryDiv.innerHTML = `
-                    <h4><i class="fas fa-calendar-alt"></i> ${entry.date}</h4>
-                    <p><strong>Ibadah:</strong> ${entry.type} (+${entry.points} poin)</p>
-                    ${detailHtml}
-                    <div class="journal-entry-actions">
-                        <button class="delete-btn" onclick="deleteJournal(${entry.id})"><i class="fas fa-trash"></i> Hapus</button>
-                    </div>
-                `;
-                journalList.appendChild(entryDiv);
-            });
-        }
+    function showQuiz() {
+        const quizContainer = document.getElementById('quiz-container');
+        quizContainer.innerHTML = '';
         
-        function deleteJournal(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus entri jurnal ini?')) {
-                let savedEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
-                const entryToDelete = savedEntries.find(entry => entry.id === id);
-                
-                if (entryToDelete) {
-                    let currentPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
-                    currentPoints -= entryToDelete.points;
-                    localStorage.setItem(pointsStorageKey, currentPoints);
-                }
-                
-                savedEntries = savedEntries.filter(entry => entry.id !== id);
-                localStorage.setItem(journalStorageKey, JSON.stringify(savedEntries));
-                showToast('Jurnal berhasil dihapus!');
-                loadJournal();
-                checkAchievements();
-            }
-        }
+        const today = new Date().toISOString().slice(0, 10);
         
-        // FUNGSI QUIZ
-        const quizDataByDate = {
-            '2025-09-24': [ // Kuis Hari 1
-                {
-                    question: "Berapa kali sholat fardhu dalam sehari semalam?",
-                    answers: { a: "3 kali", b: "5 kali", c: "7 kali" },
-                    correctAnswer: "b",
-                    points: 20
-                },
-                {
-                    question: "Siapakah Nabi yang dijuluki 'Bapak Para Nabi'?",
-                    answers: { a: "Nabi Musa a.s.", b: "Nabi Isa a.s.", c: "Nabi Ibrahim a.s." },
-                    correctAnswer: "c",
-                    points: 20
-                },
-                {
-                    question: "Rukun Islam yang pertama adalah?",
-                    answers: { a: "Membaca syahadat", b: "Sholat", c: "Puasa" },
-                    correctAnswer: "a",
-                    points: 20
-                }
-            ],
-            '2025-09-25': [ // Kuis Hari 2
-                {
-                    question: "Malaikat yang bertugas mencatat amal baik manusia adalah?",
-                    answers: { a: "Malik", b: "Raqib", c: "Munkar" },
-                    correctAnswer: "b",
-                    points: 20
-                },
-                {
-                    question: "Sebutkan nama masjid yang pertama kali dibangun di Madinah!",
-                    answers: { a: "Masjid Nabawi", b: "Masjidil Haram", c: "Masjid Quba" },
-                    correctAnswer: "c",
-                    points: 20
-                },
-                {
-                    question: "Bulan apa umat Islam wajib berpuasa?",
-                    answers: { a: "Ramadhan", b: "Syawal", c: "Rajab" },
-                    correctAnswer: "a",
-                    points: 20
-                }
-            ],
-            '2025-09-26': [ // Kuis Hari 3
-                {
-                    question: "Berapa jumlah rukun sholat?",
-                    answers: { a: "10", b: "13", c: "15" },
-                    correctAnswer: "b",
-                    points: 20
-                },
-                {
-                    question: "Siapakah istri pertama Nabi Muhammad ﷺ?",
-                    answers: { a: "Aisyah", b: "Khadijah", c: "Fatimah" },
-                    correctAnswer: "b",
-                    points: 20
-                },
-                {
-                    question: "Sikap saat mendengar adzan adalah?",
-                    answers: { a: "Berlari", b: "Mengobrol", c: "Diam dan menjawabnya" },
-                    correctAnswer: "c",
-                    points: 20
-                }
-            ]
-        };
-
-        function showQuiz() {
-            const quizContainer = document.getElementById('quiz-container');
-            quizContainer.innerHTML = '';
+        const currentQuizData = quizDataByDate[today] || quizDataByDate['2025-09-25'];
+        
+        currentQuizData.forEach((quiz, index) => {
+            const quizDiv = document.createElement('div');
+            quizDiv.classList.add('quiz-item');
             
-            // Ambil tanggal hari ini dalam format YYYY-MM-DD
-            const today = new Date().toISOString().slice(0, 10);
-            
-            // Pilih set kuis berdasarkan tanggal hari ini
-            const currentQuizData = quizDataByDate[today] || quizDataByDate['2025-09-24'];
-            
-            currentQuizData.forEach((quiz, index) => {
-                const quizDiv = document.createElement('div');
-                quizDiv.classList.add('quiz-item');
-                
-                let answersHtml = Object.keys(quiz.answers).map(key => `
-                    <label>
-                        <input type="radio" name="question${index}" value="${key}">
-                        ${quiz.answers[key]}
-                    </label><br>
-                `).join('');
+            let answersHtml = Object.keys(quiz.answers).map(key => `
+                <label>
+                    <input type="radio" name="question${index}" value="${key}">
+                    ${quiz.answers[key]}
+                </label><br>
+            `).join('');
 
-                quizDiv.innerHTML = `
-                    <p><strong>${index + 1}. ${quiz.question}</strong></p>
-                    <form id="quiz-form-${index}">${answersHtml}</form>
-                `;
-                quizContainer.appendChild(quizDiv);
-            });
-
-            const submitButton = document.createElement('button');
-            submitButton.innerText = 'Selesai Kuis';
-            submitButton.onclick = () => submitQuiz(currentQuizData);
-            quizContainer.appendChild(submitButton);
-        }
-
-        function submitQuiz(quizData) {
-            let score = 0;
-            let totalPoints = 0;
-            let allCorrect = true;
-
-            quizData.forEach((quiz, index) => {
-                const form = document.getElementById(`quiz-form-${index}`);
-                const selectedAnswer = form.querySelector(`input[name="question${index}"]:checked`);
-                
-                if (selectedAnswer && selectedAnswer.value === quiz.correctAnswer) {
-                    score++;
-                    totalPoints += quiz.points;
-                } else {
-                    allCorrect = false;
-                }
-            });
-
-            let currentPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
-            currentPoints += totalPoints;
-            localStorage.setItem(pointsStorageKey, currentPoints);
-
-            showToast(`Kamu mendapatkan ${totalPoints} poin dari kuis ini!`);
-            
-            if (allCorrect) {
-                let achievements = JSON.parse(localStorage.getItem(achievementsStorageKey)) || {};
-                if (!achievements.quizMaster) {
-                    achievements.quizMaster = true;
-                    localStorage.setItem(achievementsStorageKey, JSON.stringify(achievements));
-                    showNotification('Pencapaian Baru!', 'Selamat! Kamu berhasil menjawab semua kuis dengan benar. Lencana "Quiz Master" telah terbuka.');
-                }
-            }
-            
-            const quizContainer = document.getElementById('quiz-container');
-            quizContainer.innerHTML = `
-                <h3>Hasil Kuis</h3>
-                <p>Kamu berhasil menjawab <strong>${score} dari ${quizData.length}</strong> pertanyaan dengan benar.</p>
-                <p>Total poin yang kamu dapatkan: <strong>${totalPoints}</strong></p>
-                <button onclick="showQuiz()">Ulangi Kuis</button>
+            quizDiv.innerHTML = `
+                <p><strong>${index + 1}. ${quiz.question}</strong></p>
+                <form id="quiz-form-${index}">${answersHtml}</form>
             `;
+            quizContainer.appendChild(quizDiv);
+        });
 
-            loadJournal();
-            updateAchievementsDisplay();
-        }
+        const submitButton = document.createElement('button');
+        submitButton.innerText = 'Selesai Kuis';
+        submitButton.onclick = () => submitQuiz(currentQuizData);
+        quizContainer.appendChild(submitButton);
+    }
+    function submitQuiz(quizData) {
+        let score = 0;
+        let totalPoints = 0;
+        let allCorrect = true;
 
-        // FUNGSI PENCAPAIAN
-        const achievementsStorageKey = 'ibadahAchievements';
-        function checkAchievements() {
+        quizData.forEach((quiz, index) => {
+            const form = document.getElementById(`quiz-form-${index}`);
+            const selectedAnswer = form.querySelector(`input[name="question${index}"]:checked`);
+            
+            if (selectedAnswer && selectedAnswer.value === quiz.correctAnswer) {
+                score++;
+                totalPoints += quiz.points;
+            } else {
+                allCorrect = false;
+            }
+        });
+
+        let currentPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
+        currentPoints += totalPoints;
+        localStorage.setItem(pointsStorageKey, currentPoints);
+
+        showToast(`Kamu mendapatkan ${totalPoints} poin dari kuis ini!`);
+        
+        if (allCorrect) {
             let achievements = JSON.parse(localStorage.getItem(achievementsStorageKey)) || {};
-            const checklistData = JSON.parse(localStorage.getItem(checklistStorageKey)) || {};
-            const journalEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
-            const totalPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
-
-            // Pencapaian Hari Pertama
-            if (!achievements.firstDay && checklistData['subuh'] && Object.values(checklistData['subuh']).some(val => val === 'green' || val === 'orange')) {
-                achievements.firstDay = true;
-                showNotification('Hari Pertama', 'Selamat! Kamu telah berhasil melakukan ibadah pertamamu.');
+            if (!achievements.quizMaster) {
+                achievements.quizMaster = true;
+                localStorage.setItem(achievementsStorageKey, JSON.stringify(achievements));
+                showNotification('Pencapaian Baru!', 'Selamat! Kamu berhasil menjawab semua kuis dengan benar. Lencana "Quiz Master" telah terbuka.');
             }
-
-            // Pencapaian 10 Hari
-            const consecutiveDays = getLongestStreak();
-            if (!achievements['10Days'] && consecutiveDays >= 10) {
-                achievements['10Days'] = true;
-                showNotification('10 Hari Berturut-turut', 'Luar biasa! Kamu berhasil konsisten selama 10 hari.');
-            }
-
-            // Pencapaian 40 Hari Sempurna
-            let completed40Days = true;
-            for (let i = 1; i <= 40; i++) {
-                if (sholatNames.some(sholat => !checklistData[sholat.toLowerCase()][i])) {
-                    completed40Days = false;
-                    break;
-                }
-            }
-            if (!achievements['40Days'] && completed40Days) {
-                achievements['40Days'] = true;
-                showNotification('40 Hari Sempurna!', 'Alhamdulillah! Kamu berhasil menuntaskan tantangan 40 hari. Semoga menjadi kebiasaan selamanya.');
-            }
-
-            // Pencapaian Jurnal Pertama (diubah untuk cek entri ibadah)
-            if (!achievements.firstJournal && journalEntries.length > 0) {
-                achievements.firstJournal = true;
-                showNotification('Jurnal Pertama', 'Selamat! Jurnal ibadah pertamamu berhasil disimpan.');
-            }
-            
-            // Pencapaian Quiz Master (placeholder untuk fitur poin)
-            if (!achievements.quizMaster && totalPoints >= 100) {
-                 achievements.quizMaster = true;
-                 showNotification('Master Poin!', 'Selamat! Kamu telah mencapai 100 poin. Teruslah beribadah!');
-            }
-            
-            localStorage.setItem(achievementsStorageKey, JSON.stringify(achievements));
-            updateAchievementsDisplay();
-        }
-
-        function getLongestStreak() {
-            const checklistData = JSON.parse(localStorage.getItem(checklistStorageKey)) || {};
-            if (Object.keys(checklistData).length === 0) return 0;
-            
-            let maxStreak = 0;
-            let currentStreak = 0;
-            
-            for (let i = 1; i <= 40; i++) {
-                const allSholatChecked = sholatNames.every(sholat => {
-                    const status = checklistData[sholat.toLowerCase()][i];
-                    return status === 'green' || status === 'orange';
-                });
-                
-                if (allSholatChecked) {
-                    currentStreak++;
-                } else {
-                    if (currentStreak > maxStreak) {
-                        maxStreak = currentStreak;
-                    }
-                    currentStreak = 0;
-                }
-            }
-            return Math.max(maxStreak, currentStreak);
-        }
-
-        function updateAchievementsDisplay() {
-            const achievements = JSON.parse(localStorage.getItem(achievementsStorageKey)) || {};
-            document.getElementById('badge-first-day').classList.toggle('unlocked', achievements.firstDay);
-            document.getElementById('badge-10-days').classList.toggle('unlocked', achievements['10Days']);
-            document.getElementById('badge-40-days').classList.toggle('unlocked', achievements['40Days']);
-            document.getElementById('badge-first-journal').classList.toggle('unlocked', achievements.firstJournal);
-            document.getElementById('badge-quiz-master').classList.toggle('unlocked', achievements.quizMaster); 
-        }
-
-        // FUNGSI NOTIFIKASI SIMULASI
-        function showNotification(title, message) {
-            const notif = document.getElementById('prayer-notification');
-            const notifTitle = notif.querySelector('h4');
-            const notifMessage = notif.querySelector('p');
-            
-            notifTitle.innerHTML = `<i class="fas fa-bell"></i> ${title}`;
-            notifMessage.innerText = message;
-            
-            notif.style.display = 'block';
-            notif.classList.remove('hidden');
-
-            setTimeout(() => {
-                notif.classList.add('hidden');
-            }, 5000);
-        }
-
-        // FUNGSI PENGINGAT SHOLAT SIMULASI
-        function setPrayerReminder(prayerName, delay) {
-            setTimeout(() => {
-                const prayerNotif = document.getElementById('prayer-notification');
-                prayerNotif.querySelector('#prayer-name').innerText = prayerName;
-                prayerNotif.style.display = 'block';
-                prayerNotif.classList.remove('hidden');
-                setTimeout(() => {
-                    prayerNotif.classList.add('hidden');
-                }, 5000);
-            }, delay);
         }
         
-        document.addEventListener('DOMContentLoaded', () => {
-            const searchResultsSection = document.getElementById('search-results-section');
-            if (searchResultsSection) {
-                searchResultsSection.style.display = 'none';
+        const quizContainer = document.getElementById('quiz-container');
+        quizContainer.innerHTML = `
+            <h3>Hasil Kuis</h3>
+            <p>Kamu berhasil menjawab <strong>${score} dari ${quizData.length}</strong> pertanyaan dengan benar.</p>
+            <p>Total poin yang kamu dapatkan: <strong>${totalPoints}</strong></p>
+            <button onclick="showQuiz()">Ulangi Kuis</button>
+        `;
+
+        loadJournal();
+        updateAchievementsDisplay();
+    }
+
+    // FUNGSI PENCAPAIAN
+    const achievementsStorageKey = 'ibadahAchievements';
+    function checkAchievements() {
+        let achievements = JSON.parse(localStorage.getItem(achievementsStorageKey)) || {};
+        const checklistData = JSON.parse(localStorage.getItem(checklistStorageKey)) || {};
+        const journalEntries = JSON.parse(localStorage.getItem(journalStorageKey)) || [];
+        const totalPoints = parseInt(localStorage.getItem(pointsStorageKey) || 0);
+
+        // Pencapaian Hari Pertama
+        const today = new Date().toLocaleDateString('id-ID', { weekday: 'long' });
+        const dayChecklist = sholatNames.some(sholat => checklistData[sholat.toLowerCase()] && Object.values(checklistData[sholat.toLowerCase()]).some(val => val === 'green' || val === 'orange'));
+        if (!achievements.firstDay && (dayChecklist || journalEntries.length > 0)) {
+            achievements.firstDay = true;
+            showNotification('Hari Pertama', 'Selamat! Kamu telah berhasil melakukan ibadah pertamamu.');
+        }
+
+        // Pencapaian 10 Hari
+        const consecutiveDays = getLongestStreak();
+        if (!achievements['10Days'] && consecutiveDays >= 10) {
+            achievements['10Days'] = true;
+            showNotification('10 Hari Berturut-turut', 'Luar biasa! Kamu berhasil konsisten selama 10 hari.');
+        }
+
+        // Pencapaian 40 Hari Sempurna
+        let completed40Days = true;
+        for (let i = 1; i <= 40; i++) {
+            if (sholatNames.some(sholat => !checklistData[sholat.toLowerCase()] || !checklistData[sholat.toLowerCase()][i] || checklistData[sholat.toLowerCase()][i] === 'red')) {
+                completed40Days = false;
+                break;
             }
-            if (typeof Chart === 'undefined') {
-                document.querySelector('.chart-container').innerHTML = '<p style="text-align:center; color:red;">Grafik tidak tersedia. Silakan periksa koneksi internet Anda.</p>';
-            }
-            document.querySelectorAll('.color-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    selectedColor = e.target.dataset.color;
-                    showToast(`Warna terpilih: ${e.target.innerText}`);
-                });
+        }
+        if (!achievements['40Days'] && completed40Days) {
+            achievements['40Days'] = true;
+            showNotification('40 Hari Sempurna!', 'Alhamdulillah! Kamu berhasil menuntaskan tantangan 40 hari. Semoga menjadi kebiasaan selamanya.');
+        }
+
+        // Pencapaian Jurnal Pertama
+        if (!achievements.firstJournal && journalEntries.length > 0) {
+            achievements.firstJournal = true;
+            showNotification('Jurnal Pertama', 'Selamat! Jurnal ibadah pertamamu berhasil disimpan.');
+        }
+        
+        // Pencapaian Master Poin
+        if (!achievements.pointMaster && totalPoints >= 100) {
+             achievements.pointMaster = true;
+             showNotification('Master Poin!', 'Selamat! Kamu telah mencapai 100 poin. Teruslah beribadah!');
+        }
+        
+        localStorage.setItem(achievementsStorageKey, JSON.stringify(achievements));
+        updateAchievementsDisplay();
+    }
+    function getLongestStreak() {
+        const checklistData = JSON.parse(localStorage.getItem(checklistStorageKey)) || {};
+        if (Object.keys(checklistData).length === 0) return 0;
+        
+        let maxStreak = 0;
+        let currentStreak = 0;
+        
+        for (let i = 1; i <= 40; i++) {
+            const allSholatChecked = sholatNames.every(sholat => {
+                const status = checklistData[sholat.toLowerCase()][i];
+                return status === 'green' || status === 'orange';
             });
-            createChecklistTable();
-            loadJournal();
-            updateAchievementsDisplay();
-            showSection('home');
+            
+            if (allSholatChecked) {
+                currentStreak++;
+            } else {
+                if (currentStreak > maxStreak) {
+                    maxStreak = currentStreak;
+                }
+                currentStreak = 0;
+            }
+        }
+        return Math.max(maxStreak, currentStreak);
+    }
+    function updateAchievementsDisplay() {
+        const achievements = JSON.parse(localStorage.getItem(achievementsStorageKey)) || {};
+        document.getElementById('badge-first-day').classList.toggle('unlocked', achievements.firstDay);
+        document.getElementById('badge-10-days').classList.toggle('unlocked', achievements['10Days']);
+        document.getElementById('badge-40-days').classList.toggle('unlocked', achievements['40Days']);
+        document.getElementById('badge-first-journal').classList.toggle('unlocked', achievements.firstJournal);
+        document.getElementById('badge-point-master').classList.toggle('unlocked', achievements.pointMaster); 
+    }
+
+    // FUNGSI NOTIFIKASI SIMULASI
+    function showNotification(title, message) {
+        const notif = document.getElementById('prayer-notification');
+        const notifTitle = notif.querySelector('h4');
+        const notifMessage = notif.querySelector('p');
+        
+        notifTitle.innerHTML = `<i class="fas fa-bell"></i> ${title}`;
+        notifMessage.innerText = message;
+        
+        notif.style.display = 'block';
+        notif.classList.remove('hidden');
+
+        setTimeout(() => {
+            notif.classList.add('hidden');
+        }, 5000);
+    }
+
+    // FUNGSI PENGINGAT SHOLAT SIMULASI
+    function setPrayerReminder(prayerName, delay) {
+        setTimeout(() => {
+            const prayerNotif = document.getElementById('prayer-notification');
+            prayerNotif.querySelector('#prayer-name').innerText = prayerName;
+            prayerNotif.style.display = 'block';
+            prayerNotif.classList.remove('hidden');
+            setTimeout(() => {
+                prayerNotif.classList.add('hidden');
+            }, 5000);
+        }, delay);
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchResultsSection = document.getElementById('search-results-section');
+        if (searchResultsSection) {
+            searchResultsSection.style.display = 'none';
+        }
+        if (typeof Chart === 'undefined') {
+            document.querySelector('.chart-container').innerHTML = '<p style="text-align:center; color:red;">Grafik tidak tersedia. Silakan periksa koneksi internet Anda.</p>';
+        }
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                selectedColor = e.target.dataset.color;
+                showToast(`Warna terpilih: ${e.target.innerText}`);
+            });
         });
-    </script>
-</body>
-</html>
+        createChecklistTable();
+        loadJournal();
+        updateAchievementsDisplay();
+        showSection('home');
+    });
+</script>
