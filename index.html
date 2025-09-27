@@ -78,6 +78,31 @@
     margin: 0;
 }
 
+/* --- Styling Kartu Streak Istiqomah --- */
+.streak-status-card {
+    grid-column: span 1;
+    /* Ukuran sama */
+    text-align: center;
+    /* Kita gunakan warna aksen yang lebih panas untuk menunjukkan 'fire' streak */
+    border-left: 5px solid #ff7e5f;
+}
+
+.streak-status-card .score-display h2 {
+    font-size: 3em;
+    font-weight: 800;
+    /* Warna yang lebih bersemangat */
+    color: #ff7e5f;
+    margin: 0;
+}
+
+.streak-status-card .score-display p {
+    font-size: 0.9em;
+    color: var(--text-color);
+    margin-top: 5px;
+}
+
+
+
 .score-display p {
     font-size: 0.9em;
     color: var(--text-color);
@@ -758,6 +783,8 @@
     </div>
 </div>
            
+           
+           
         
     <div class="card daily-score-card">
     <div class="card-header">
@@ -803,6 +830,18 @@
         
     </div>
 
+
+    
+<div class="card streak-status-card">
+    <div class="card-header">
+        <i class="fas fa-fire"></i> Streak Istiqomah
+    </div>
+    <div class="score-display">
+        <h2 id="currentStreakDisplay">0</h2>
+        <p>Hari Berturut-turut</p>
+    </div>
+</div>   
+       
        
                 
                 
@@ -1613,6 +1652,104 @@ function loadChecklistStatus() {
     }
 }
 
+// =======================================================
+// KONSTANTA BARU
+// =======================================================
+const TOTAL_PRAYERS = 5; // Jumlah total sholat fardhu (Subuh, Dzuhur, Ashar, Maghrib, Isya)
+const MAX_DAILY_POINTS = TOTAL_PRAYERS * 10; // Poin maksimal harian: 50
+const STREAK_KEY = 'istiqomah_streak_count'; // Kunci untuk menyimpan streak saat ini
+
+
+// FUNGSI BARU: Fungsi untuk mendapatkan tanggal N hari yang lalu
+function getPreviousDateKey(daysAgo) {
+    const date = new Date();
+    date.setDate(date.getDate() - daysAgo); // Mundur N hari
+    const dateString = date.toISOString().split('T')[0];
+    return `checklist_${dateString}`;
+}
+
+// FUNGSI BARU: Menghitung Streak Beruntun
+function calculateStreak() {
+    let currentStreak = 0;
+    
+    // Looping mundur hari demi hari
+    for (let daysAgo = 1; daysAgo < 365; daysAgo++) { 
+        
+        // Dapatkan kunci penyimpanan dari hari sebelumnya
+        const yesterdayKey = getPreviousDateKey(daysAgo);
+        const yesterdayScoreKey = 'istiqomah_daily_score'; // Anggap skor hari lalu disimpan di key ini
+        
+        // Ambil skor dari hari sebelumnya
+        const yesterdayScore = localStorage.getItem(yesterdayScoreKey.replace('daily_score', yesterdayKey));
+        
+        // Karena kita tidak menyimpan skor harian dengan kunci tanggal,
+        // KITA HARUS MEMERIKSA CHECKLIST NYA LANGSUNG
+
+        const yesterdayChecklist = localStorage.getItem(yesterdayKey);
+
+        // Jika tidak ada data tersimpan untuk hari itu, streak PATAH.
+        if (!yesterdayChecklist) {
+            break; 
+        }
+
+        try {
+            const status = JSON.parse(yesterdayChecklist);
+            let checkedCount = 0;
+            for (const id in status) {
+                if (status[id] === true) {
+                    checkedCount++;
+                }
+            }
+
+            // Cek apakah SEMUA sholat (5) diselesaikan hari itu
+            if (checkedCount === TOTAL_PRAYERS) {
+                currentStreak++; // Streak berlanjut
+            } else {
+                break; // Streak PATAH jika ada yang bolong
+            }
+
+        } catch (e) {
+            console.error("Gagal parse data streak untuk hari:", yesterdayKey);
+            break;
+        }
+    }
+    
+    return currentStreak;
+}
+
+
+// FUNGSI BARU: Memperbarui tampilan Streak
+function updateStreakDisplay(streakCount) {
+    const streakEl = document.getElementById('currentStreakDisplay');
+    if (streakEl) {
+        streakEl.textContent = streakCount.toString();
+        // Opsional: berikan efek glow jika streak tinggi
+        if (streakCount > 0) {
+             streakEl.style.textShadow = '0 0 8px rgba(255, 126, 95, 0.7)';
+        } else {
+             streakEl.style.textShadow = 'none';
+        }
+    }
+}
+
+
+// MODIFIKASI: Perbarui loadChecklistStatus() untuk menampilkan streak saat halaman dimuat
+function loadChecklistStatus() {
+    // ... (kode pemuatan checklist dan poin yang sudah ada di sini) ...
+    
+    // 1. Muat dan tampilkan skor harian (Tetap sama)
+    const savedScore = localStorage.getItem(DAILY_SCORE_KEY);
+    updateScoreDisplay(savedScore ? parseInt(savedScore) : 0);
+    
+    // 2. Muat status centang (Tetap sama)
+    // ...
+    
+    // 3. HITUNG DAN TAMPILKAN STREAK SAAT MEMUAT
+    const currentStreak = calculateStreak();
+    updateStreakDisplay(currentStreak);
+
+    // ... (lanjutan try/catch kode pemuatan status)
+}
 
 
 
