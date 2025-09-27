@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -9,8 +8,148 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-    
 
+
+/* --- Styling Kartu Waktu Sholat --- */
+.prayer-time-card {
+    grid-column: span 1; /* Atur lebar kartu agar sama dengan kartu jam */
+    text-align: center;
+    border-left: 5px solid var(--accent-color);
+}
+
+.next-prayer-info {
+    padding: 5px 0;
+}
+
+.next-prayer-info p {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 1em;
+}
+
+.countdown-timer {
+    font-size: 2em; /* Ukuran hitung mundur */
+    font-weight: 700;
+    color: var(--accent-color);
+    margin: 5px 0 10px 0;
+}
+
+.prayer-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+
+.prayer-table td {
+    padding: 3px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--bg-color);
+}
+
+.prayer-table .time-value {
+    font-weight: bold;
+    color: var(--accent-color); /* Waktu menggunakan aksen warna */
+    text-align: right;
+}
+
+/* Penanda Sholat yang Aktif (Opsional: Tambahkan highlight pada sholat berikutnya) */
+.prayer-table .active-prayer {
+    background-color: var(--bg-color); 
+    font-weight: bold;
+}
+
+
+/* --- Styling Kartu Poin Harian --- */
+.daily-score-card {
+    grid-column: span 1;
+    /* Lebar kartu sama dengan Jam/Waktu Sholat */
+    text-align: center;
+    border-right: 5px solid var(--accent-color);
+}
+
+.score-display {
+    padding: 15px 0;
+}
+
+.score-display h2 {
+    font-size: 3em;
+    font-weight: 800;
+    color: var(--accent-color);
+    margin: 0;
+}
+
+.score-display p {
+    font-size: 0.9em;
+    color: var(--text-color);
+    margin-top: 5px;
+}
+
+    
+/* --- Styling Jam Digital Live --- */
+.live-clock-card {
+    grid-column: span 1; /* Atur lebar card jam */
+    text-align: center;
+    border-left: 5px solid var(--accent-color); /* Aksen warna */
+}
+
+.clock {
+    padding: 15px 0;
+    line-height: 1; /* Hilangkan jarak antar baris */
+}
+
+.container-clock {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container-clock h2 {
+    margin: 0;
+    padding: 0 5px;
+    font-size: 2em; /* Ukuran jam */
+    font-weight: 700;
+    color: var(--text-color);
+    transition: color 0.3s;
+}
+
+.container-clock .dot {
+    font-size: 3em;
+    color: var(--accent-color); /* Titik menggunakan warna aksen */
+}
+
+
+/* Penyesuaian untuk tampilan mobile */
+@media (max-width: 768px) {
+    .container-clock h2 {
+        font-size: 0.5em;
+        padding: 0 3px;
+    }
+    .container-clock .dot {
+        font-size: 0.5em;
+    }
+    .container-clock #ampm {
+        font-size: 0.8em;
+    }
+}
+
+
+/* --- Tambahan CSS untuk Tanggal --- */
+.date-display {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--text-color);
+    margin: 0;
+    padding-bottom: 5px;
+    /* Jarak antara tanggal dan jam */
+}
+
+/* Sesuaikan tampilan card-header agar sejajar */
+.live-clock-card .card-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
 
     
         /* Variabel Warna */
@@ -549,7 +688,6 @@
         }
         
 
-
         
         
     </style>
@@ -571,10 +709,103 @@
 
 
 
+
+<div class="card prayer-time-card">
+    <div class="card-header">
+        <i class="fas fa-mosque"></i> Waktu Sholat Hari Ini
+    </div>
+    
+    <div class="next-prayer-info">
+        <p>Sholat **<span id="nextPrayerName"></span>** dalam:</p>
+        <h2 id="countdownTimer" class="countdown-timer">Memuat...</h2>
+    </div>
+
+    <hr style="border-top: 1px solid var(--bg-color);">
+    
+    <table class="prayer-table">
+        <tbody id="prayerTimesBody">
+            </tbody>
+    </table>
+    
+    <small style="display: block; text-align: right; color: #7f8c8d;">Lokasi: <span id="prayerLocation">Bengkulu</span></small>
+</div>
+
+
+
+
+
     <div class="dashboard">
         <nav class="sidebar">
             <h2><i class="fas fa-chart-line"></i> Dashboard</h2>
             <ul>
+                
+                
+              <div class="card live-clock-card">
+    <div class="card-header">
+        <i class="fas fa-clock"></i> Waktu Sekarang
+    </div>
+    
+    <h3 id="currentDate" class="date-display">minggu, 27 september  2025</h3>
+                
+    <div class="clock">
+        <div class="container-clock">
+            <h2 id="hour">00</h2>
+            <h2 class="dot">:</h2>
+            <h2 id="minute">00</h2>
+            <h2 class="dot">:</h2>
+            <h2 id="seconds">00</h2>
+        </div>
+    </div>
+</div>
+           
+        
+    <div class="card daily-score-card">
+    <div class="card-header">
+        <i class="fas fa-star"></i> Poin Ibadah Hari Ini
+    </div>
+    <div class="score-display">
+        <h2 id="dailyScoreDisplay">0</h2>
+        <p>Poin telah kamu kumpulkan</p>
+    </div>
+</div>
+    
+           
+
+    <div class="card checklist-sholat-card">
+        <div class="card-header">
+            <i class="fas fa-calendar-check"></i> Checklist Sholat 40 Hari
+        </div>
+        
+        <div class="checklist-item">
+            <label for="sholat-subuh">Sholat Subuh</label>
+            <input type="checkbox" id="sholat-subuh" data-id="sholat-subuh">
+        </div>
+        
+        <div class="checklist-item">
+            <label for="sholat-dzuhur">Sholat Dzuhur</label>
+            <input type="checkbox" id="sholat-dzuhur" data-id="sholat-dzuhur">
+        </div>
+        
+        <div class="checklist-item">
+            <label for="sholat-ashar">Sholat Ashar</label>
+            <input type="checkbox" id="sholat-ashar" data-id="sholat-ashar">
+        </div>
+        
+        <div class="checklist-item">
+            <label for="sholat-maghrib">Sholat Maghrib</label>
+            <input type="checkbox" id="sholat-maghrib" data-id="sholat-maghrib">
+        </div>
+        
+        <div class="checklist-item">
+            <label for="sholat-isya">Sholat Isya</label>
+            <input type="checkbox" id="sholat-isya" data-id="sholat-isya">
+        </div>
+        
+    </div>
+
+       
+                
+                
                 <li onclick="showSection('home')"><i class="fas fa-home"></i> Beranda</li>
                 <li onclick="showSection('stats')"><i class="fas fa-chart-bar"></i> Statistik</li>
                 <li onclick="showSection('chart')"><i class="fas fa-chart-line"></i> Grafik</li>
@@ -595,6 +826,9 @@
             </ul>
         </nav>
 
+
+
+
         <main class="main-content">
             <div class="header-container">
                 <h1 style="margin: 0;">Dashboard</h1>
@@ -612,6 +846,8 @@
 <section id="home-section" style="display: block;">
     <h2>Selamat Datang di Dashboard</h2>
     <p style="text-align: center;">Dashboard ini menyajikan data hipotetis mengenai tren penurunan ibadah di kalangan remaja. Data ini bersifat edukatif dan terinspirasi dari riset global. Gunakan navigasi di samping untuk menjelajahi statistik, trik, doa, dan hadis.</p>
+    
+    
     
     
     <div class="container" style="margin-top: 20px; border-left: 5px solid #27ae60;">
@@ -647,7 +883,9 @@
     </div>
 </section>
 
- 
+
+
+
 
                     
 
@@ -1229,7 +1467,378 @@
             </div>
         </main>
     </div>
+    
     <script>
+    
+// =======================================================
+// FUNGSI BARU UNTUK SISTEM POIN HARIAN (GANTI FUNGSI LAMA)
+// =======================================================
+
+const DAILY_SCORE_KEY = 'istiqomah_daily_score'; // Kunci penyimpanan skor harian
+
+// FUNGSI BARU: Menghitung poin hari ini (10 poin per sholat fardhu)
+function calculateDailyPoints(status) {
+    let points = 0;
+    // Kita anggap semua input di checklist-sholat-card adalah sholat fardhu
+    for (const id in status) {
+        if (status[id] === true) {
+            points += 10; // Setiap sholat yang dicentang memberikan 10 poin
+        }
+    }
+    return points;
+}
+
+// FUNGSI BARU: Memperbarui tampilan skor total di dashboard
+function updateScoreDisplay(points) {
+    const scoreElement = document.getElementById('dailyScoreDisplay');
+    if (scoreElement) {
+        scoreElement.textContent = points.toString();
+    }
+}
+
+
+// FUNGSI 1: Menyimpan status checklist & MENGHITUNG POIN (GANTI FUNGSI saveChecklistStatus)
+function saveChecklistStatus() {
+    const checklistInputs = document.querySelectorAll('.checklist-sholat-card input[type="checkbox"]');
+    const status = {};
+    
+    checklistInputs.forEach(input => {
+        const id = input.getAttribute('data-id');
+        if (id) {
+            status[id] = input.checked;
+        }
+    });
+
+    // 1. Hitung poin hari ini
+    const dailyPoints = calculateDailyPoints(status);
+    
+    // 2. Simpan status checklist dengan kunci harian
+    const dailyKey = getDailyStorageKey();
+    localStorage.setItem(dailyKey, JSON.stringify(status));
+    
+    // 3. Simpan poin harian
+    localStorage.setItem(DAILY_SCORE_KEY, dailyPoints.toString());
+    
+    // 4. Perbarui tampilan
+    updateScoreDisplay(dailyPoints);
+    console.log(`Status checklist dan Poin Harian (${dailyPoints}) berhasil disimpan.`);
+}
+
+
+// FUNGSI 2: Memuat status checklist & POIN (GANTI FUNGSI loadChecklistStatus)
+function loadChecklistStatus() {
+    const dailyKey = getDailyStorageKey();
+    const savedStatus = localStorage.getItem(dailyKey);
+    
+    // 1. Muat dan tampilkan skor harian
+    const savedScore = localStorage.getItem(DAILY_SCORE_KEY);
+    updateScoreDisplay(savedScore ? parseInt(savedScore) : 0);
+
+    // 2. Muat status centang
+    if (!savedStatus) {
+        return; 
+    }
+
+    try {
+        const status = JSON.parse(savedStatus);
+        
+        for (const id in status) {
+            const input = document.querySelector(`input[data-id="${id}"]`);
+            if (input) {
+                input.checked = status[id];
+            }
+        }
+    } catch (e) {
+        console.error("Gagal memuat status checklist:", e);
+    }
+}
+// =======================================================
+    
+    
+    
+    
+// =======================================================
+// FUNGSI BARU UNTUK KUNCI PENYIMPANAN
+// =======================================================
+
+// Fungsi untuk mendapatkan kunci yang unik untuk hari ini (misal: 'checklist_2025-09-27')
+function getDailyStorageKey() {
+    const today = new Date();
+    // Menggunakan ISO string untuk mendapatkan format YYYY-MM-DD
+    const dateString = today.toISOString().split('T')[0]; 
+    return `checklist_${dateString}`; // Kunci akan berubah setiap hari
+}
+
+// FUNGSI 1: Menyimpan status checklist ke localStorage (MODIFIKASI)
+function saveChecklistStatus() {
+    const checklistInputs = document.querySelectorAll('.checklist-sholat-card input[type="checkbox"]');
+    const status = {};
+    
+    checklistInputs.forEach(input => {
+        const id = input.getAttribute('data-id');
+        if (id) {
+            status[id] = input.checked;
+        }
+    });
+
+    const dailyKey = getDailyStorageKey();
+    // Simpan data menggunakan kunci harian
+    localStorage.setItem(dailyKey, JSON.stringify(status));
+    console.log("Status checklist berhasil disimpan untuk hari ini:", dailyKey);
+}
+
+// FUNGSI 2: Memuat status checklist dari localStorage (MODIFIKASI)
+function loadChecklistStatus() {
+    const dailyKey = getDailyStorageKey();
+    const savedStatus = localStorage.getItem(dailyKey); // Ambil data hari ini
+    
+    if (!savedStatus) {
+        // Jika tidak ada data tersimpan untuk hari ini, SEMUA CHECKBOX AKAN KOSONG
+        return; 
+    }
+
+    try {
+        const status = JSON.parse(savedStatus);
+        
+        for (const id in status) {
+            const input = document.querySelector(`input[data-id="${id}"]`);
+            if (input) {
+                // Atur status centang
+                input.checked = status[id];
+            }
+        }
+        console.log("Status checklist berhasil dimuat untuk hari ini:", dailyKey);
+    } catch (e) {
+        console.error("Gagal memuat status checklist dari localStorage:", e);
+    }
+}
+
+
+
+
+
+// FUNGSI 3: Menginisialisasi Event Listener (TETAP SAMA)
+function initializeChecklistStorage() {
+    // 1. Muat status checklist yang terakhir disimpan saat aplikasi dimulai
+    loadChecklistStatus();
+
+    // 2. Tambahkan event listener ke setiap checkbox
+    const checklistInputs = document.querySelectorAll('.checklist-sholat-card input[type="checkbox"]');
+    checklistInputs.forEach(input => {
+        // Setiap perubahan akan memicu penyimpanan dengan kunci harian
+        input.addEventListener('change', saveChecklistStatus); 
+    });
+}
+// =======================================================
+
+    
+    
+    
+  // =======================================================
+// FUNGSI BARU: WAKTU SHOLAT DINAMIS
+// =======================================================
+const PRAYER_API_URL = "https://api.aladhan.com/v1/timingsByCity";
+const LOCATION_CITY = "Bengkulu";
+const LOCATION_COUNTRY = "Indonesia";
+
+let prayerTimes = {};
+let orderedPrayerNames = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+
+function formatTime(time24) {
+// API Aladhan sudah memberikan format 24 jam (HH:MM).
+// Kita langsung kembalikan nilainya tanpa konversi ke AM/PM.
+return time24;
+}
+
+function updatePrayerTable(times) {
+    const tableBody = document.getElementById('prayerTimesBody');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = ''; // Bersihkan tabel
+    const today = new Date();
+    const nowMinutes = today.getHours() * 60 + today.getMinutes();
+    
+    // Menampilkan waktu sholat dan mencari sholat berikutnya
+    let nextPrayerIndex = -1;
+    let nextPrayerTime = Infinity;
+
+    orderedPrayerNames.forEach((name, index) => {
+        // Ambil waktu sholat dari API
+        const time24 = times[name];
+        const [h, m] = time24.split(':').map(Number);
+        const prayerMinutes = h * 60 + m;
+
+        // Bandingkan untuk mencari sholat berikutnya
+        if (prayerMinutes > nowMinutes && prayerMinutes < nextPrayerTime) {
+            nextPrayerTime = prayerMinutes;
+            nextPrayerIndex = index;
+        }
+
+        // Tampilkan di tabel
+        const row = tableBody.insertRow();
+        row.innerHTML = `
+            <td>${name}</td>
+            <td class="time-value">${formatTime(time24)}</td>
+        `;
+        // if (index === nextPrayerIndex) {
+        //     row.classList.add('active-prayer'); // Tandai sholat berikutnya
+        // }
+    });
+    
+    // Jika semua sholat hari ini sudah terlewat, set sholat berikutnya ke Subuh besok
+    if (nextPrayerIndex === -1) {
+         nextPrayerIndex = 0; // Subuh
+    }
+    
+    return orderedPrayerNames[nextPrayerIndex];
+}
+
+
+function startCountdown(nextPrayerName) {
+    const countdownEl = document.getElementById('countdownTimer');
+    const nextPrayerNameEl = document.getElementById('nextPrayerName');
+    
+    if (!countdownEl || !nextPrayerNameEl) return;
+    
+    const nextTime24 = prayerTimes[nextPrayerName];
+    if (!nextTime24) return;
+
+    // Tampilkan nama sholat berikutnya
+    nextPrayerNameEl.textContent = nextPrayerName;
+
+    const [targetH, targetM] = nextTime24.split(':').map(Number);
+    
+    // Fungsi yang diperbarui setiap detik
+    setInterval(() => {
+        const now = new Date();
+        let target = new Date();
+        target.setHours(targetH, targetM, 0, 0);
+
+        // Jika waktu target sudah terlewat hari ini, set target untuk besok
+        if (now > target) {
+            target.setDate(target.getDate() + 1);
+        }
+        
+        const diffSeconds = Math.floor((target.getTime() - now.getTime()) / 1000);
+        
+        const h = Math.floor(diffSeconds / 3600);
+        const m = Math.floor((diffSeconds % 3600) / 60);
+        const s = diffSeconds % 60;
+
+        // Format countdown: HH:MM:SS
+        countdownEl.textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        
+        // Jika hitungan mundur selesai (00:00:00), muat ulang data (opsional, untuk kesegaran)
+        if (diffSeconds <= 0) {
+             // Muat ulang waktu sholat untuk hari berikutnya
+             fetchPrayerTimes(); 
+        }
+
+    }, 1000);
+}
+
+
+async function fetchPrayerTimes() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1; // Bulan dimulai dari 0
+    const day = today.getDate();
+
+    try {
+        const response = await fetch(`${PRAYER_API_URL}/${day}-${month}-${year}?city=${LOCATION_CITY}&country=${LOCATION_COUNTRY}&method=11`); // Method 11 adalah Kemenag RI
+        const data = await response.json();
+
+        if (data.code === 200 && data.status === 'OK') {
+            // Simpan waktu sholat (hanya waktu utama)
+            prayerTimes = {
+                Fajr: data.data.timings.Fajr,
+                Dhuhr: data.data.timings.Dhuhr,
+                Asr: data.data.timings.Asr,
+                Maghrib: data.data.timings.Maghrib,
+                Isha: data.data.timings.Isha
+            };
+            
+            // Perbarui tabel dan dapatkan sholat berikutnya
+            const nextPrayer = updatePrayerTable(prayerTimes);
+            
+            // Mulai hitungan mundur (Hanya panggil sekali)
+            if (!window.prayerCountdownStarted) {
+                startCountdown(nextPrayer);
+                window.prayerCountdownStarted = true;
+            } else {
+                 // Jika sudah berjalan, cukup update tabel dan nama sholat berikutnya
+                 document.getElementById('nextPrayerName').textContent = nextPrayer;
+            }
+
+        } else {
+            document.getElementById('countdownTimer').textContent = "Error API";
+            console.error("Gagal memuat waktu sholat:", data.data);
+        }
+    } catch (error) {
+        document.getElementById('countdownTimer').textContent = "Error Jaringan";
+        console.error("Gagal fetch waktu sholat:", error);
+    }
+}
+
+
+
+
+
+// Panggil fungsi utama saat halaman dimuat
+document.addEventListener('DOMContentLoaded', () => {
+    // ... kode inisialisasi Anda yang lain ...
+    
+    // Panggil ini untuk memulai
+    fetchPrayerTimes(); 
+});
+  
+    
+  document.addEventListener('DOMContentLoaded', () => {
+    // ... kode inisialisasi yang sudah ada (misalnya: initializeColorTheme(), fetchPrayerTimes()) ...
+    
+    // Panggil fungsi penyimpanan data BARU
+    initializeChecklistStorage();
+    
+    // ... sisa kode di dalam DOMContentLoaded ...
+});
+  
+    
+    
+// ===== FUNGSI CLOCK YANG SUDAH DIMODIFIKASI (FORMAT 24 JAM) =====
+function clock() {
+    let hour = document.getElementById('hour');
+    let minute = document.getElementById('minute');
+    let seconds = document.getElementById('seconds');
+    // let ampm = document.getElementById('ampm'); // Baris ini tidak perlu lagi
+
+    // Cek apakah elemen jam ada di halaman aktif.
+    if (!hour) return; 
+
+    let date = new Date();
+    let h = date.getHours(); // Langsung ambil jam 24 jam
+    let m = date.getMinutes();
+    let s = date.getSeconds();
+    
+    // TIDAK PERLU LOGIKA KONVERSI 12 JAM/AM/PM
+    // if (h >= 12) { ... }
+    
+    // Pastikan angka selalu 2 digit (misalnya 09 bukan 9)
+    h = (h < 10) ? '0' + h : h;
+    m = (m < 10) ? '0' + m : m;
+    s = (s < 10) ? '0' + s : s;
+
+    hour.innerHTML = h;
+    minute.innerHTML = m;
+    seconds.innerHTML = s;
+    // ampm.innerHTML = ''; // Tidak perlu menampilkan AM/PM
+};
+// =======================================================
+// Panggilan setInterval tetap sama:
+var interval = setInterval(clock, 1000); 
+// =======================================================
+
+
+
     
     
 // GLOBAL VARIABLES (Tambahan Data Baru)
@@ -1259,10 +1868,10 @@ const simulatedPrayerTimes = [
 
         // Leaderboard Data (Simulasi)
         let leaderboardData = [
-            { name: "Siti", points: 450 },
-            { name: "Budi", points: 300 },
-            { name: "Ahmad", points: 200 },
-            { name: "Ria", points: 150 },
+            { name: "Siti", points: 3450 },
+            { name: "Budi", points: 3086 },
+            { name: "Ahmad", points: 1267 },
+            { name: "Ria", points: 788   },
         ];
         
 // --- FUNGSI TAB NAVIGATION (PENTING!) ---
@@ -1336,7 +1945,10 @@ function setWeeklyChallenge() {
     const challengeText = weeklyChallenges[challengeIndex];
     
     // Tampilkan di UI
-    document.getElementById('sunnah-challenge').textContent = challengeText;
+    const challengeElement = document.getElementById('sunnah-challenge');
+    if(challengeElement) {
+        challengeElement.textContent = challengeText;
+    }
     
     // Simpan tantangan saat ini ke Local Storage (jika perlu untuk pengecekan progres)
     localStorage.setItem('currentChallenge', challengeText);
@@ -1371,27 +1983,35 @@ function setWeeklyChallenge() {
                 targetSection.style.display = 'block';
             }
             
-            // Logika khusus untuk Search: jika buka search, panggil fungsi search
+            // Logika khusus untuk Search
             if (sectionId === 'search-results') {
+                // Pastikan section search-results ditampilkan
                 document.getElementById('search-results-section').style.display = 'block';
+                // Panggil go() lagi untuk memicu penampilan hasil
+                if (window.google && window.google.search && window.google.search.cse) {
+                     window.google.search.cse.element.go();
+                }
             }
         }
 
         function toggleTheme() {
             const currentTheme = document.body.getAttribute('data-theme');
+            const toggleButton = document.querySelector('.theme-toggle button');
             if (currentTheme === 'dark') {
                 document.body.removeAttribute('data-theme');
                 localStorage.setItem('theme', 'light');
-                document.querySelector('.theme-toggle button').innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+                if (toggleButton) toggleButton.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
             } else {
                 document.body.setAttribute('data-theme', 'dark');
                 localStorage.setItem('theme', 'dark');
-                document.querySelector('.theme-toggle button').innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+                if (toggleButton) toggleButton.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
             }
         }
 
         function showToast(message) {
             const toast = document.getElementById('toast');
+            if (!toast) return; 
+
             toast.textContent = message;
             toast.style.display = 'block';
             
@@ -1407,11 +2027,13 @@ function setWeeklyChallenge() {
 
         function playAudio(audioId) {
             const audio = document.getElementById(audioId);
-            if (audio && audio.src && audio.src.includes('http')) {
-                audio.play();
-                showToast(`Memainkan audio untuk: ${audioId.replace('Audio', '')}`);
-            } else {
+            if (audio && audio.src && audio.src.includes('URL_AUDIO')) {
                 showToast("URL Audio tidak valid. Ini adalah simulasi.");
+            } else if (audio) {
+                 audio.play();
+                 showToast(`Memainkan audio untuk: ${audioId.replace('Audio', '')}`);
+            } else {
+                showToast("Audio element not found.");
             }
         }
         
@@ -1419,11 +2041,15 @@ function setWeeklyChallenge() {
             const reader = new FileReader();
             reader.onload = function(){
                 const output = document.getElementById('profile-picture');
-                output.src = reader.result;
-                localStorage.setItem('profilePic', reader.result);
-                showToast("Foto profil berhasil diunggah (tersimpan lokal)!");
+                if (output) {
+                    output.src = reader.result;
+                    localStorage.setItem('profilePic', reader.result);
+                    showToast("Foto profil berhasil diunggah (tersimpan lokal)!");
+                }
             };
-            reader.readAsDataURL(event.target.files[0]);
+            if (event.target.files.length > 0) {
+                 reader.readAsDataURL(event.target.files[0]);
+            }
         }
 
         // --- POINT & LEADERBOARD FUNCTIONS ---
@@ -1443,9 +2069,13 @@ function setWeeklyChallenge() {
         }
 
         function loadUserPoints() {
-            document.getElementById('ibadah-points').textContent = userPoints;
-            document.getElementById('profile-points').textContent = userPoints;
-            document.getElementById('user-current-points').textContent = userPoints;
+            const ibadahPoints = document.getElementById('ibadah-points');
+            const profilePoints = document.getElementById('profile-points');
+            const userCurrentPoints = document.getElementById('user-current-points');
+            
+            if (ibadahPoints) ibadahPoints.textContent = userPoints;
+            if (profilePoints) profilePoints.textContent = userPoints;
+            if (userCurrentPoints) userCurrentPoints.textContent = userPoints;
         }
 
         function renderLeaderboard() {
@@ -1461,6 +2091,8 @@ function setWeeklyChallenge() {
             leaderboardData.sort((a, b) => b.points - a.points);
 
             const tbody = document.getElementById('leaderboard-body');
+            if (!tbody) return;
+            
             tbody.innerHTML = '';
             
             // Tampilkan top 5
@@ -1489,8 +2121,10 @@ function setWeeklyChallenge() {
         function addIbadah() {
             const ibadahSelect = document.getElementById('ibadah-select');
             const ibadahDetail = document.getElementById('ibadah-detail');
+            if (!ibadahSelect) return;
+            
             const type = ibadahSelect.value;
-            const detail = ibadahDetail.value.trim();
+            const detail = ibadahDetail ? ibadahDetail.value.trim() : '';
             const points = getJournalPoints(type);
             
             if (type) {
@@ -1508,7 +2142,7 @@ function setWeeklyChallenge() {
                 renderJournal();
                 showToast(`Berhasil mencatat ${type}! Mendapat +${points} Poin.`);
                 
-                ibadahDetail.value = ''; // Reset detail
+                if (ibadahDetail) ibadahDetail.value = ''; // Reset detail
             } else {
                 showToast("Pilih jenis ibadah terlebih dahulu.");
             }
@@ -1532,10 +2166,13 @@ function setWeeklyChallenge() {
 
         function renderJournal() {
             const journalList = document.getElementById('journal-list');
+            if (!journalList) return;
+            
             journalList.innerHTML = '';
             
             if (journalEntries.length === 0) {
                 journalList.innerHTML = '<p style="text-align: center; color: #777;">Belum ada catatan ibadah hari ini. Ayo mulai mencatat!</p>';
+                checkFirstJournalAchievement(); // Panggil tetap di sini
                 return;
             }
 
@@ -1590,6 +2227,8 @@ function getSymbol(color) {
 
             function renderChecklist() {
         const tbody = document.getElementById('checklist-body');
+        if (!tbody) return;
+        
         tbody.innerHTML = '';
 
         // Iterasi melalui setiap sholat fardhu (kunci dalam checklistData)
@@ -1615,6 +2254,9 @@ function handleChecklistClick(event) {
     const cell = event.target;
     const sholat = cell.getAttribute('data-sholat');
     const dayIndex = parseInt(cell.getAttribute('data-day')) - 1;
+    
+    // Safety check
+    if (!sholat || isNaN(dayIndex) || dayIndex < 0 || dayIndex >= 40) return;
     
     const previousStatus = checklistData[sholat][dayIndex];
     const previousPoints = getChecklistPoints(previousStatus);
@@ -1683,11 +2325,13 @@ function handleChecklistClick(event) {
         
         function showNotification(message) {
             const notification = document.getElementById('prayer-notification');
+            if (!notification) return;
+            
             const h4 = notification.querySelector('h4');
             const p = notification.querySelector('p');
 
-            h4.innerHTML = `<i class="fas fa-trophy"></i> Selamat!`;
-            p.textContent = message;
+            if (h4) h4.innerHTML = `<i class="fas fa-trophy"></i> Selamat!`;
+            if (p) p.textContent = message;
             notification.style.display = 'block';
             notification.classList.remove('hidden');
 
@@ -1769,6 +2413,8 @@ function handleChecklistClick(event) {
 
         function renderQuiz() {
             const quizContainer = document.getElementById('quiz-container');
+            if (!quizContainer) return;
+            
             const quizCompleted = localStorage.getItem('quizCompleted') === new Date().toLocaleDateString('id-ID');
 
             if (quizCompleted) {
@@ -1826,10 +2472,13 @@ function handleChecklistClick(event) {
             localStorage.setItem('quizCompleted', new Date().toLocaleDateString('id-ID'));
             
             // Sembunyikan Kuis setelah submit (simulasi kuis harian)
-            document.getElementById('quiz-container').innerHTML = `
-                <p style="text-align: center; color: #27ae60;">Kuis selesai! Skor Anda: ${score}/${totalQuestions}. Anda mendapat +${quizPoints} Poin.</p>
-                <p style="text-align: center; color: #e74c3c;">Kembali besok untuk kuis baru!</p>
-            `;
+            const quizContainer = document.getElementById('quiz-container');
+            if (quizContainer) {
+                quizContainer.innerHTML = `
+                    <p style="text-align: center; color: #27ae60;">Kuis selesai! Skor Anda: ${score}/${totalQuestions}. Anda mendapat +${quizPoints} Poin.</p>
+                    <p style="text-align: center; color: #e74c3c;">Kembali besok untuk kuis baru!</p>
+                `;
+            }
             
             // Cek Quiz Master (Simulasi hitungan)
             let quizPerfectCount = parseInt(localStorage.getItem('quizPerfectCount')) || 0;
@@ -1868,8 +2517,14 @@ function handleChecklistClick(event) {
         let dynamicTableData = JSON.parse(localStorage.getItem('dynamicTableData')) || tableData;
 
         function createChart() {
-            const ctx = document.getElementById('myChart').getContext('2d');
-            myChart = new Chart(ctx, {
+            const ctx = document.getElementById('myChart');
+            if (!ctx) return;
+            
+            if (myChart) {
+                myChart.destroy(); // Hancurkan chart lama jika ada
+            }
+
+            myChart = new Chart(ctx.getContext('2d'), {
                 type: 'line',
                 data: ibadahData,
                 options: {
@@ -1915,7 +2570,10 @@ function handleChecklistClick(event) {
         }
 
         function filterChart() {
-            const filter = document.getElementById('yearFilter').value;
+            const yearFilter = document.getElementById('yearFilter');
+            if (!yearFilter || !myChart) return;
+            
+            const filter = yearFilter.value;
             let currentData = { ...ibadahData };
 
             if (filter === '2020-2022') {
@@ -1933,10 +2591,14 @@ function handleChecklistClick(event) {
         }
         
         function renderTable() {
-            const tbody = document.getElementById('dataTable').querySelector('tbody');
-            tbody.innerHTML = '';
+            const tbody = document.getElementById('dataTable');
+            if (!tbody || !tbody.querySelector('tbody')) return;
+            
+            const actualTbody = tbody.querySelector('tbody');
+            actualTbody.innerHTML = '';
+            
             dynamicTableData.forEach((row, index) => {
-                const tr = tbody.insertRow();
+                const tr = actualTbody.insertRow();
                 tr.insertCell(0).textContent = row.year;
                 tr.insertCell(1).textContent = row.percent;
                 tr.insertCell(2).textContent = row.factor;
@@ -1992,47 +2654,6 @@ function handleChecklistClick(event) {
                 }
             }
 
-// --- JADWAL SHOLAT REAL TIME (BARU) ---
-
-async function fetchRealPrayerTime() {
-    const location = document.getElementById('user-location').value.trim();
-    if (!location) {
-        showToast("Harap masukkan nama kota Anda terlebih dahulu!");
-        return;
-    }
-    
-    showToast(`Mencari waktu sholat di ${location}...`);
-    
-    // Gunakan lokasi yang diinput pengguna untuk mencari waktu sholat hari ini
-    // CATATAN: Karena ini adalah simulasi di browser, hasilnya akan dicetak di konsol.
-    
-    // Simulasi pemanggilan API Google Search:
-    const query = `waktu sholat hari ini ${location}`;
-    
-    // Tampilkan pesan hasil (ini adalah output API Google yang disimulasikan)
-    console.log("--- SIMULASI HASIL PENCARIAN WAKTU SHOLAT ---");
-    console.log(`Pencarian untuk: ${query}`);
-    console.log("-------------------------------------------");
-    
-    
-    // Ganti data simulasi di dashboard dengan hasil fiktif
-    const fiktifTimes = {
-        'Subuh': '04:45',
-        'Dzuhur': '11:45',
-        'Ashar': '15:15',
-        'Maghrib': '17:50',
-        'Isya': '19:00'
-    };
-    
-    // Tampilkan di konsol agar user tahu data fiktif yang baru
-    console.log("Data Waktu Sholat Fiktif yang Diperbarui:");
-    console.table(fiktifTimes);
-
-    // Perbarui waktu sholat berikutnya di UI
-    updateNextPrayerFromFiktif(fiktifTimes);
-
-    showToast(`Waktu sholat untuk ${location} sudah diperbarui. Cek di konsol (F12) untuk detail dan di dashboard untuk waktu berikutnya.`);
-}
 
 function updateNextPrayerFromFiktif(fiktifTimes) {
     const now = new Date();
@@ -2056,14 +2677,16 @@ function updateNextPrayerFromFiktif(fiktifTimes) {
         }
     }
     
-
+    const nextPrayerTimeEl = document.getElementById('next-prayer-time');
+    const nextPrayerNameEl = document.getElementById('next-prayer-name');
+    
     if (!nextPrayer) {
         // Jika sudah melewati Isya, ambil Subuh untuk keesokan hari
         nextPrayer = tempPrayerArray[0];
     }
     
-    document.getElementById('next-prayer-time').textContent = nextPrayer.time;
-    document.getElementById('next-prayer-name').textContent = nextPrayer.name;
+    if (nextPrayerTimeEl) nextPrayerTimeEl.textContent = nextPrayer.time;
+    if (nextPrayerNameEl) nextPrayerNameEl.textContent = nextPrayer.name;
 }
 
 
@@ -2072,15 +2695,17 @@ function updateNextPrayerFromFiktif(fiktifTimes) {
                 nextPrayer = simulatedPrayerTimes[0];
             }
             
-            document.getElementById('next-prayer-time').textContent = nextPrayer.time;
-            document.getElementById('next-prayer-name').textContent = nextPrayer.name;
+            const nextPrayerTimeEl = document.getElementById('next-prayer-time');
+            const nextPrayerNameEl = document.getElementById('next-prayer-name');
+            
+            if (nextPrayerTimeEl) nextPrayerTimeEl.textContent = nextPrayer.time;
+            if (nextPrayerNameEl) nextPrayerNameEl.textContent = nextPrayer.name;
 
             // Cek apakah waktu sholat TEPAT tiba (untuk notifikasi)
             const [h, m] = nextPrayer.time.split(':').map(Number);
             const prayerTimeTargetInMinutes = h * 60 + m;
             
             // Logika untuk memicu notifikasi jika waktu sholat sudah tiba/melebihi 
-            // (Kita simulasikan notifikasi muncul 1 menit setelah waktu sholat)
             if (prayerTimeTargetInMinutes === currentTime + 1) { // Notif muncul 1 menit setelah waktu target
                 showPrayerNotificationAlert(nextPrayer.name);
             }
@@ -2088,9 +2713,14 @@ function updateNextPrayerFromFiktif(fiktifTimes) {
 
         function showPrayerNotificationAlert(prayerName) {
             const notification = document.getElementById('prayer-notification');
+            if (!notification) return;
+            
             // Ganti teks notifikasi default
-            notification.querySelector('h4').innerHTML = `<i class="fas fa-bell"></i> Waktu Sholat Tiba!`;
-            notification.querySelector('p').innerHTML = `Ayo, segera tunaikan sholat <span id="prayer-name">${prayerName}</span>.`;
+            const h4 = notification.querySelector('h4');
+            const p = notification.querySelector('p');
+            
+            if (h4) h4.innerHTML = `<i class="fas fa-bell"></i> Waktu Sholat Tiba!`;
+            if (p) p.innerHTML = `Ayo, segera tunaikan sholat <span id="prayer-name">${prayerName}</span>.`;
             
             notification.style.display = 'block';
             notification.classList.remove('hidden');
@@ -2105,20 +2735,28 @@ function updateNextPrayerFromFiktif(fiktifTimes) {
         }
 
         function saveLocation() {
-            const locationInput = document.getElementById('user-location').value;
-            localStorage.setItem('userLocation', locationInput);
-            showToast(`Lokasi '${locationInput}' berhasil disimpan!`);
+            const locationInput = document.getElementById('user-location');
+            if (!locationInput) return;
+            
+            const location = locationInput.value;
+            localStorage.setItem('userLocation', location);
+            showToast(`Lokasi '${location}' berhasil disimpan!`);
         }
 
         function loadLocation() {
             const savedLocation = localStorage.getItem('userLocation');
-            if (savedLocation) {
-                document.getElementById('user-location').value = savedLocation;
+            const locationInput = document.getElementById('user-location');
+            if (savedLocation && locationInput) {
+                locationInput.value = savedLocation;
             }
         }
 
         // --- HADIS HARIAN FUNCTION (PENAMBAHAN) ---
         function loadDailyHadith() {
+            const hadithTextElement = document.getElementById('daily-hadith-text');
+            const hadithSourceElement = document.getElementById('daily-hadith-source');
+            if (!hadithTextElement || !hadithSourceElement) return;
+            
             // Gunakan hari dalam setahun untuk memilih hadis, agar hadis berubah setiap hari
             const start = new Date(new Date().getFullYear(), 0, 0);
             const diff = new Date() - start;
@@ -2128,8 +2766,6 @@ function updateNextPrayerFromFiktif(fiktifTimes) {
             const index = dayOfYear % dailyHadiths.length;
             const hadith = dailyHadiths[index];
 
-            const hadithTextElement = document.getElementById('daily-hadith-text');
-            const hadithSourceElement = document.getElementById('daily-hadith-source');
             
             if (hadithTextElement && hadithSourceElement) {
                 hadithTextElement.textContent = hadith.text;
@@ -2144,13 +2780,12 @@ function updateNextPrayerFromFiktif(fiktifTimes) {
     for (let i = 0; i < 40; i++) {
         // Cek apakah SEMUA sholat fardhu di hari itu sudah di-checklist (hijau atau oranye)
         const isDayComplete = sholatFardhu.every(sholat => 
-            checklistData[sholat][i] === 'green' || checklistData[sholat][i] === 'orange' // UBAH: Gunakan checklistData di sini
+            checklistData[sholat][i] === 'green' || checklistData[sholat][i] === 'orange' 
         );
         if (isDayComplete) {
             daysCompleted++;
         }
     }
-// ... sisa kode ...
 
             
             const percentage = (daysCompleted / 40) * 100;
@@ -2165,27 +2800,34 @@ function updateNextPrayerFromFiktif(fiktifTimes) {
         }
 
 
+
+
         // --- INITIALIZATION (MODIFIKASI) ---
         
         document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- INI SANGAT PENTING: Panggil semua fungsi inisialisasi di sini ---
+            
             // Load theme
             const savedTheme = localStorage.getItem('theme');
+            const toggleButton = document.querySelector('.theme-toggle button');
             if (savedTheme === 'dark') {
                 document.body.setAttribute('data-theme', 'dark');
-                document.querySelector('.theme-toggle button').innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+                if (toggleButton) toggleButton.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
             } else {
-                 document.querySelector('.theme-toggle button').innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+                 if (toggleButton) toggleButton.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
             }
 
             // Load profile picture
             const savedPic = localStorage.getItem('profilePic');
-            if (savedPic) {
-                document.getElementById('profile-picture').src = savedPic;
-            } else {
-                 document.getElementById('profile-picture').src = "https://via.placeholder.com/100?text=Profile";
+            const profilePicEl = document.getElementById('profile-picture');
+            if (savedPic && profilePicEl) {
+                profilePicEl.src = savedPic;
+            } else if (profilePicEl) {
+                 profilePicEl.src = "https://via.placeholder.com/100?text=Profile";
             }
 
-            // Inisialisasi Data
+            // Inisialisasi Data & UI
             loadUserPoints();
             renderJournal();
             renderChecklist();
@@ -2193,19 +2835,20 @@ function updateNextPrayerFromFiktif(fiktifTimes) {
             renderQuiz();
             loadAchievements();
             renderLeaderboard();
-            checkAllAchievements(); // Cek achievements saat load
-            loadDailyHadith(); // Load Hadis Harian
+            checkAllAchievements(); 
+            loadDailyHadith(); 
             setWeeklyChallenge();
-            loadLocation(); // Load Lokasi
-            updatePrayerNotification(); // Panggil pertama kali
+            loadLocation(); 
+            updatePrayerNotification(); 
 
             // Set interval untuk mengecek waktu sholat setiap menit
             setInterval(updatePrayerNotification, 60000);
 
             // Inisialisasi Chart
-            if (document.getElementById('myChart')) {
-                createChart();
-            }
+            createChart(); // Panggil tanpa pengecekan if(myChart)
+
+            // Peringatan Data Lokal
+            showToast("Perhatian: Semua data (poin, checklist, dll.) hanya tersimpan di browser Anda.");
             
             
             // Inisialisasi Listener untuk tombol checklist
@@ -2215,24 +2858,27 @@ function updateNextPrayerFromFiktif(fiktifTimes) {
             
             // Inisialisasi Google Custom Search Engine (CSE)
             if (window.google && window.google.search && window.google.search.cse) {
+                // Panggil go() sekali untuk menginisialisasi search box
                 window.google.search.cse.element.go();
                 
-                // Monitor perubahan hasil pencarian untuk menampilkan search section
                 const searchResults = document.querySelector('.gcse-searchresults-only');
-                if (searchResults) {
-                    new MutationObserver((mutationsList, observer) => {
-                        for(const mutation of mutationsList) {
-                            if (mutation.type === 'childList') {
-                                const isSearchVisible = searchResults.querySelector('.gsc-webResult') || searchResults.querySelector('.gsc-result-info');
-                                if (searchResults.style.display !== 'none' && isSearchVisible) {
-                                    showSection('search-results');
-                                }
-                            }
+                const searchBoxContainer = document.querySelector('.gcse-searchbox-only');
+                
+                // Tambahkan event listener pada search box untuk auto-pindah ke hasil pencarian
+                if (searchBoxContainer) {
+                    const observer = new MutationObserver((mutationsList, observer) => {
+                        // Cek apakah ada hasil pencarian yang muncul
+                        const isSearchVisible = searchResults && (searchResults.querySelector('.gsc-webResult') || searchResults.querySelector('.gsc-result-info'));
+                        if (isSearchVisible) {
+                            showSection('search-results');
                         }
-                        
-                        
-                    }).observe(searchResults.parentElement, { childList: true, subtree: true });
+                    });
+
+                    // Amati perubahan pada search box itu sendiri (input)
+                    observer.observe(searchBoxContainer, { childList: true, subtree: true });
                 }
             }
         });
     </script>
+
+    
