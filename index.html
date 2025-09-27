@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -8,6 +9,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+    
+
+
+    
         /* Variabel Warna */
         :root {
             --bg-color: #f4f4f4;
@@ -542,6 +547,11 @@
                 padding: 5px;
             }
         }
+        
+
+
+        
+        
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -558,6 +568,8 @@
         <h4><i class="fas fa-bell"></i> Waktu Sholat Tiba!</h4>
         <p>Ayo, segera tunaikan sholat <span id="prayer-name"></span>.</p>
     </div>
+
+
 
     <div class="dashboard">
         <nav class="sidebar">
@@ -597,28 +609,49 @@
                     <div class="gcse-searchresults-only"></div>
                 </section>
 
-                <section id="home-section" style="display: block;">
-                    <h2>Selamat Datang di Dashboard</h2>
-                    <p style="text-align: center;">Dashboard ini menyajikan data hipotetis mengenai tren penurunan ibadah di kalangan remaja. Data ini bersifat edukatif dan terinspirasi dari riset global. Gunakan navigasi di samping untuk menjelajahi statistik, trik, doa, dan hadis.</p>
-                    
-                    
-                    <div class="container" style="margin-top: 20px; border-left: 5px solid #27ae60;">
-    <h3><i class="fas fa-book-open"></i> Hadis Harian</h3>
-    <p id="daily-hadith-text" style="font-style: italic;"></p>
-    <p style="font-size: 0.8em; text-align: right;" id="daily-hadith-source"></p>
-</div>
+<section id="home-section" style="display: block;">
+    <h2>Selamat Datang di Dashboard</h2>
+    <p style="text-align: center;">Dashboard ini menyajikan data hipotetis mengenai tren penurunan ibadah di kalangan remaja. Data ini bersifat edukatif dan terinspirasi dari riset global. Gunakan navigasi di samping untuk menjelajahi statistik, trik, doa, dan hadis.</p>
+    
+    
+    <div class="container" style="margin-top: 20px; border-left: 5px solid #27ae60;">
+        <h3><i class="fas fa-book-open"></i> Hadis Harian</h3>
+        <p id="daily-hadith-text" style="font-style: italic;"></p>
+        <p style="font-size: 0.8em; text-align: right;" id="daily-hadith-source"></p>
+    </div>
+
+    <div class="container" style="margin-top: 20px; text-align: center;">
+        <h3><i class="fas fa-map-marker-alt"></i> Lokasi & Waktu Sholat</h3>
+        <div style="margin-bottom: 15px;">
+            <label for="user-location" style="font-weight: bold;">Lokasi (Kota):</label>
+            <input type="text" id="user-location" placeholder="Masukkan Kota Anda" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
+            <button onclick="saveLocation()" style="margin-left: 5px;">Simpan</button>
+        </div>
+        <button onclick="fetchRealPrayerTime()" style="background-color: #e67e22; margin-bottom: 15px;">
+            <i class="fas fa-clock"></i> Cari Waktu Sholat Real Time
+        </button>
+        <p style="margin-top: 10px;">Waktu Sholat Berikutnya: <strong id="next-prayer-time">—</strong> (<span id="next-prayer-name">—</span>)</p>
+    </div>
+    <div class="container card" style="margin-top: 20px; background-color: #f7f7f7; border-left: 5px solid #2ecc71;">
+        <h3 style="color: #2ecc71; margin-bottom: 5px;"><i class="fas fa-medal"></i> Tantangan Sunnah Minggu Ini!</h3>
+        <p id="sunnah-challenge" style="font-weight: bold; font-size: 1.1em; color: #34495e;">Memuat Tantangan...</p>
+        <p style="font-size: 0.9em; color: #7f8c8d;">(Tantangan diperbarui setiap hari Senin)</p>
+    </div>
+    <div class="container" style="margin-top: 20px;">
+        <h3><i class="fas fa-bullhorn"></i> Informasi Terbaru</h3>
+        <ul style="list-style-type: none; padding: 0;">
+            <li style="margin-bottom: 10px;"><i class="fas fa-circle-check" style="color: #27ae60;"></i> Data 2024 berhasil ditambahkan. Grafik dan tabel telah diperbarui!</li>
+            <li style="margin-bottom: 10px;"><i class="fas fa-circle-check" style="color: #27ae60;"></i> Fitur Dark Mode kini tersedia untuk kenyamanan Anda.</li>
+            <li style="margin-bottom: 10px;"><i class="fas fa-circle-check" style="color: #27ae60;"></i> Fitur **Checklist Sholat 40 Hari** telah ditambahkan. Ayo mulai konsisten!</li>
+        </ul>
+    </div>
+</section>
+
+ 
 
                     
-                    
-                    <div class="container" style="margin-top: 20px;">
-                        <h3><i class="fas fa-bullhorn"></i> Informasi Terbaru</h3>
-                        <ul style="list-style-type: none; padding: 0;">
-                            <li style="margin-bottom: 10px;"><i class="fas fa-circle-check" style="color: #27ae60;"></i> Data 2024 berhasil ditambahkan. Grafik dan tabel telah diperbarui!</li>
-                            <li style="margin-bottom: 10px;"><i class="fas fa-circle-check" style="color: #27ae60;"></i> Fitur Dark Mode kini tersedia untuk kenyamanan Anda.</li>
-                            <li style="margin-bottom: 10px;"><i class="fas fa-circle-check" style="color: #27ae60;"></i> Fitur **Checklist Sholat 40 Hari** telah ditambahkan. Ayo mulai konsisten!</li>
-                        </ul>
-                    </div>
-                </section>
+
+                
 
                 <section id="stats-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
@@ -645,14 +678,9 @@
                     </div>
                 </section>
                 
-                
-                   <div style="margin-top: 15px;">
-        <label for="user-location" style="font-weight: bold;">Lokasi (Kota):</label>
-        <input type="text" id="user-location" placeholder="Masukkan Kota Anda" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
-        <button onclick="saveLocation()" style="margin-left: 5px;">Simpan</button>
-    </div>
-    <p style="text-align: center; margin-top: 10px;">Waktu Sholat Berikutnya: <strong id="next-prayer-time">—</strong> (<span id="next-prayer-name">—</span>)</p>
-    </div>
+
+
+        
 
 
                 
@@ -1172,6 +1200,10 @@
                         <p>Poin Ibadah Total: <strong id="profile-points">0</strong> Poin</p>
                     </div>
                 </section>
+   
+
+
+                
 
                 <section id="web-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
@@ -1232,6 +1264,85 @@ const simulatedPrayerTimes = [
             { name: "Ahmad", points: 200 },
             { name: "Ria", points: 150 },
         ];
+        
+// --- FUNGSI TAB NAVIGATION (PENTING!) ---
+function openTab(tabName) {
+    // Sembunyikan semua konten tab
+    const tabContents = document.getElementsByClassName('tab-content');
+    for (let i = 0; i < tabContents.length; i++) {
+        tabContents[i].style.display = 'none';
+        tabContents[i].classList.remove('active');
+    }
+
+    // Hapus status 'active' dari semua item sidebar
+    const sidebarItems = document.getElementsByClassName('sidebar-item');
+    for (let i = 0; i < sidebarItems.length; i++) {
+        sidebarItems[i].classList.remove('active');
+    }
+
+    // Tampilkan tab yang dipilih
+    const selectedTab = document.getElementById(tabName);
+    if (selectedTab) {
+        selectedTab.style.display = 'block';
+        selectedTab.classList.add('active');
+        // Panggil fungsi render ulang jika itu adalah tab spesifik
+        if (tabName === 'statistic-tab') {
+            createChart(); // Pastikan grafik di-render ulang
+        }
+        if (tabName === 'leaderboard-tab') {
+            renderLeaderboard(); // Pastikan leaderboard di-render ulang
+        }
+    }
+}
+
+
+
+
+
+        
+        
+        function getChecklistPoints(status) {
+    if (status === 'sholat-done') {
+        return 10; // Setiap sholat yang ditandai memberi 10 poin
+    }
+    return 0;
+}
+
+
+// --- FUNGSI TANTANGAN SUNNAH MINGGUAN (BARU) ---
+
+const weeklyChallenges = [
+    "Sholat Dhuha minimal 2 rakaat setiap hari.",
+    "Membaca Surah Al-Kahfi di hari Jumat.",
+    "Puasa Sunnah Senin atau Kamis.",
+    "Membaca 1 halaman Al-Qur'an setelah Sholat Subuh.",
+    "Bersedekah, sekecil apapun, minimal 3 kali dalam seminggu.",
+    "Sholat Sunnah Rawatib Qobliyah/Ba'diyah secara konsisten."
+];
+
+function setWeeklyChallenge() {
+    const today = new Date();
+    // Hitung hari Senin terakhir (atau hari ini jika hari Senin)
+    const dayOfWeek = today.getDay(); // 0 = Minggu, 1 = Senin, ..., 6 = Sabtu
+    
+    // Gunakan tanggal (hari) untuk menentukan indeks tantangan (0-5)
+    // Formula sederhana: (Nomor Hari dalam Sejarah Sejak 1970 / 7) MOD Jumlah Tantangan
+    // Ini memastikan tantangan berubah setiap minggu.
+    const dayNumber = Math.floor(today.getTime() / (1000 * 60 * 60 * 24));
+    
+    // Tantangan berubah setiap 7 hari
+    const challengeIndex = Math.floor(dayNumber / 7) % weeklyChallenges.length;
+    
+    const challengeText = weeklyChallenges[challengeIndex];
+    
+    // Tampilkan di UI
+    document.getElementById('sunnah-challenge').textContent = challengeText;
+    
+    // Simpan tantangan saat ini ke Local Storage (jika perlu untuk pengecekan progres)
+    localStorage.setItem('currentChallenge', challengeText);
+}
+
+        
         
         // Checklist State
         let currentColor = 'green'; // Default color
@@ -1449,14 +1560,16 @@ const simulatedPrayerTimes = [
         }
 
         // --- CHECKLIST FUNCTIONS ---
+        
+function getSymbol(color) {
+    if (color === 'green') return '✓';
+    if (color === 'orange') return '●';
+    if (color === 'red') return '✗';
+    // Tambahan untuk mengembalikan string kosong jika status adalah '' (kosong)
+    return ''; 
+}
 
-        function getSymbol(color) {
-            if (color === 'green') return '✓';
-            if (color === 'orange') return '●';
-            if (color === 'red') return '✗';
-            return '';
-        }
-
+        
         function getChecklistPoints(color) {
             if (color === 'green') return 50;
             if (color === 'orange') return 30;
@@ -1475,62 +1588,77 @@ const simulatedPrayerTimes = [
             showToast(`Mode checklist: ${currentColor}`);
         }
 
-        function renderChecklist() {
-            const tbody = document.getElementById('checklist-body');
-            tbody.innerHTML = '';
+            function renderChecklist() {
+        const tbody = document.getElementById('checklist-body');
+        tbody.innerHTML = '';
 
-            sholatFardhu.forEach(sholat => {
-                const tr = tbody.insertRow();
-                tr.insertCell(0).innerHTML = `<strong>${sholat}</strong>`;
+        // Iterasi melalui setiap sholat fardhu (kunci dalam checklistData)
+        sholatFardhu.forEach(sholat => {
+            const tr = tbody.insertRow();
+            tr.insertCell(0).innerHTML = `<strong>${sholat}</strong>`;
 
-                for (let i = 0; i < 40; i++) {
-                    const status = checklistData[sholat][i];
-                    const cell = tr.insertCell(i + 1);
-                    cell.className = `checklist-cell ${status}`;
-                    cell.textContent = getSymbol(status);
-                    cell.setAttribute('data-sholat', sholat);
-                    cell.setAttribute('data-day', i + 1);
-                    cell.onclick = handleChecklistClick;
-                }
-            });
-            updateChecklistProgress(); // Panggil saat render
-        }
+            for (let i = 0; i < 40; i++) {
+                const status = checklistData[sholat][i];
+                const cell = tr.insertCell(i + 1);
+                cell.className = `checklist-cell ${status}`;
+                cell.textContent = getSymbol(status);
+                cell.setAttribute('data-sholat', sholat);
+                cell.setAttribute('data-day', i + 1);
+                cell.onclick = handleChecklistClick;
+            }
+        });
+        updateChecklistProgress(); // Panggil saat render
+    }
+
         
-        function handleChecklistClick(event) {
-            const cell = event.target;
-            const sholat = cell.getAttribute('data-sholat');
-            const dayIndex = parseInt(cell.getAttribute('data-day')) - 1;
-            
-            const previousStatus = checklistData[sholat][dayIndex];
-            const previousPoints = getChecklistPoints(previousStatus);
-            
-            // 1. Tentukan Poin yang Akan Diperoleh/Dipotong
-            let pointChange = 0;
-            if (previousStatus !== '') {
-                pointChange -= previousPoints;
-            }
+function handleChecklistClick(event) {
+    const cell = event.target;
+    const sholat = cell.getAttribute('data-sholat');
+    const dayIndex = parseInt(cell.getAttribute('data-day')) - 1;
+    
+    const previousStatus = checklistData[sholat][dayIndex];
+    const previousPoints = getChecklistPoints(previousStatus);
+    
+    // 1. Tentukan Poin yang Akan Diperoleh/Dipotong
+    let pointChange = 0;
+    
+    // Logika BARU untuk 2 kali klik:
+    let newStatus = currentColor;
+    let toastMessage = `Berhasil mencatat ${sholat} Hari ${dayIndex + 1}.`;
 
-            // 2. Update Status & Data
-            checklistData[sholat][dayIndex] = currentColor;
-            localStorage.setItem('checklistData', JSON.stringify(checklistData));
-            
-            // 3. Tentukan Poin BARU yang Akan Ditambahkan
-            const newPoints = getChecklistPoints(currentColor);
-            pointChange += newPoints;
-
-            // 4. Update UI
-            cell.textContent = getSymbol(currentColor);
-            cell.className = `checklist-cell ${currentColor}`;
-            
-            // 5. Update Poin Global
-            if (pointChange !== 0) {
-                updatePoints(pointChange);
-            }
-            
-            // 6. Cek achievements dan perbarui progres
-            checkAllAchievements();
-            updateChecklistProgress();
+    if (previousStatus === currentColor) {
+        // Jika status yang diklik sama dengan warna saat ini, HAPUS (set ke kosong)
+        newStatus = '';
+        pointChange -= previousPoints; // Kurangi poin sebelumnya
+        toastMessage = `Checklist ${sholat} Hari ${dayIndex + 1} dibatalkan.`;
+    } else {
+        // Jika status berbeda atau kosong, terapkan warna baru
+        if (previousStatus !== '') {
+            pointChange -= previousPoints; // Kurangi poin sebelumnya (jika ada)
         }
+        pointChange += getChecklistPoints(newStatus); // Tambah poin baru
+    }
+
+    // 2. Update Status & Data
+    checklistData[sholat][dayIndex] = newStatus;
+    localStorage.setItem('checklistData', JSON.stringify(checklistData));
+    
+    // 3. Update UI
+    cell.textContent = getSymbol(newStatus);
+    cell.className = `checklist-cell ${newStatus}`;
+    
+    // 4. Update Poin Global
+    if (pointChange !== 0) {
+        updatePoints(pointChange);
+    }
+            
+    // 5. Cek achievements dan perbarui progres
+    checkAllAchievements();
+    updateChecklistProgress();
+    showToast(toastMessage);
+}
+
+
 
         function clearChecklist() {
             if (confirm("Anda yakin ingin mereset checklist 40 hari? Data akan hilang.")) {
@@ -1864,6 +1992,81 @@ const simulatedPrayerTimes = [
                 }
             }
 
+// --- JADWAL SHOLAT REAL TIME (BARU) ---
+
+async function fetchRealPrayerTime() {
+    const location = document.getElementById('user-location').value.trim();
+    if (!location) {
+        showToast("Harap masukkan nama kota Anda terlebih dahulu!");
+        return;
+    }
+    
+    showToast(`Mencari waktu sholat di ${location}...`);
+    
+    // Gunakan lokasi yang diinput pengguna untuk mencari waktu sholat hari ini
+    // CATATAN: Karena ini adalah simulasi di browser, hasilnya akan dicetak di konsol.
+    
+    // Simulasi pemanggilan API Google Search:
+    const query = `waktu sholat hari ini ${location}`;
+    
+    // Tampilkan pesan hasil (ini adalah output API Google yang disimulasikan)
+    console.log("--- SIMULASI HASIL PENCARIAN WAKTU SHOLAT ---");
+    console.log(`Pencarian untuk: ${query}`);
+    console.log("-------------------------------------------");
+    
+    
+    // Ganti data simulasi di dashboard dengan hasil fiktif
+    const fiktifTimes = {
+        'Subuh': '04:45',
+        'Dzuhur': '11:45',
+        'Ashar': '15:15',
+        'Maghrib': '17:50',
+        'Isya': '19:00'
+    };
+    
+    // Tampilkan di konsol agar user tahu data fiktif yang baru
+    console.log("Data Waktu Sholat Fiktif yang Diperbarui:");
+    console.table(fiktifTimes);
+
+    // Perbarui waktu sholat berikutnya di UI
+    updateNextPrayerFromFiktif(fiktifTimes);
+
+    showToast(`Waktu sholat untuk ${location} sudah diperbarui. Cek di konsol (F12) untuk detail dan di dashboard untuk waktu berikutnya.`);
+}
+
+function updateNextPrayerFromFiktif(fiktifTimes) {
+    const now = new Date();
+    const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes(); 
+    let nextPrayer = null;
+
+    // Ubah objek fiktif menjadi array seperti simulatedPrayerTimes
+    const tempPrayerArray = Object.keys(fiktifTimes).map(name => ({
+        name: name,
+        time: fiktifTimes[name]
+    }));
+    
+    // Cari waktu sholat berikutnya
+    for (const prayer of tempPrayerArray) {
+        const [hour, minute] = prayer.time.split(':').map(Number);
+        const prayerTimeInMinutes = hour * 60 + minute;
+
+        if (prayerTimeInMinutes > currentTimeInMinutes) {
+            nextPrayer = prayer;
+            break;
+        }
+    }
+    
+
+    if (!nextPrayer) {
+        // Jika sudah melewati Isya, ambil Subuh untuk keesokan hari
+        nextPrayer = tempPrayerArray[0];
+    }
+    
+    document.getElementById('next-prayer-time').textContent = nextPrayer.time;
+    document.getElementById('next-prayer-name').textContent = nextPrayer.name;
+}
+
+
             if (!nextPrayer) {
                 // Jika sudah melewati Isya, ambil Subuh di hari berikutnya (simulasi)
                 nextPrayer = simulatedPrayerTimes[0];
@@ -1936,17 +2139,19 @@ const simulatedPrayerTimes = [
 
         // --- CHECKLIST PROGRESS FUNCTIONS (PENAMBAHAN) ---
         function updateChecklistProgress() {
-            let daysCompleted = 0;
+    let daysCompleted = 0;
 
-            for (let i = 0; i < 40; i++) {
-                // Cek apakah SEMUA sholat fardhu di hari itu sudah di-checklist (hijau atau oranye)
-                const isDayComplete = sholatFardhu.every(sholat => 
-                    checklistData[sholat][i] === 'green' || checklistData[sholat][i] === 'orange'
-                );
-                if (isDayComplete) {
-                    daysCompleted++;
-                }
-            }
+    for (let i = 0; i < 40; i++) {
+        // Cek apakah SEMUA sholat fardhu di hari itu sudah di-checklist (hijau atau oranye)
+        const isDayComplete = sholatFardhu.every(sholat => 
+            checklistData[sholat][i] === 'green' || checklistData[sholat][i] === 'orange' // UBAH: Gunakan checklistData di sini
+        );
+        if (isDayComplete) {
+            daysCompleted++;
+        }
+    }
+// ... sisa kode ...
+
             
             const percentage = (daysCompleted / 40) * 100;
 
@@ -1990,6 +2195,7 @@ const simulatedPrayerTimes = [
             renderLeaderboard();
             checkAllAchievements(); // Cek achievements saat load
             loadDailyHadith(); // Load Hadis Harian
+            setWeeklyChallenge();
             loadLocation(); // Load Lokasi
             updatePrayerNotification(); // Panggil pertama kali
 
@@ -2000,6 +2206,7 @@ const simulatedPrayerTimes = [
             if (document.getElementById('myChart')) {
                 createChart();
             }
+            
             
             // Inisialisasi Listener untuk tombol checklist
             document.querySelectorAll('.color-btn').forEach(btn => {
@@ -2022,10 +2229,10 @@ const simulatedPrayerTimes = [
                                 }
                             }
                         }
+                        
+                        
                     }).observe(searchResults.parentElement, { childList: true, subtree: true });
                 }
             }
         });
     </script>
- 
-
