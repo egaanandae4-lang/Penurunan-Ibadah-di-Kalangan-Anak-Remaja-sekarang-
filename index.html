@@ -10,6 +10,133 @@
     <style>
 
 
+/* ======================================= */
+/* STYLING KHUSUS KOMPAS KIBLAT */
+/* ======================================= */
+
+.qibla-card {
+    text-align: center;
+    border: none;
+    padding: 30px 20px;
+}
+
+.compass-container {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    margin: 30px auto;
+}
+
+.compass-base {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* Jarum akan berputar di atas gambar dasar */
+}
+
+.qibla-needle {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* PENTING: Titik rotasi harus di tengah */
+    transform-origin: center center;
+    /* Jarum akan berputar di sini */
+    transform: rotate(0deg);
+    transition: transform 0.3s ease-out;
+    /* Animasi putaran yang halus */
+}
+
+#qibla-status {
+    color: var(--accent-color);
+}
+
+
+/* ======================================= */
+/* STYLING KHUSUS KUTIPAN HARIAN */
+/* ======================================= */
+
+.quote-card {
+    border-left: 5px solid var(--accent-color);
+    text-align: center;
+    padding: 20px;
+}
+
+.quote-card h3 {
+    color: var(--accent-color);
+    font-size: 1.2em;
+    margin-bottom: 15px;
+}
+
+#dailyQuoteText {
+    font-family: Georgia, serif;
+    /* Menggunakan font yang lebih berkarakter untuk kutipan */
+    font-size: 1.3em;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+#quoteSource {
+    font-size: 0.9em;
+    margin-top: 15px;
+    font-style: normal;
+}
+
+
+/* ======================================= */
+/* STYLING KHUSUS DOA HARIAN (menggunakan class doa-card) */
+/* ======================================= */
+
+.doa-card {
+    /* Menggunakan border untuk highlight */
+    border-left: 5px solid var(--accent-color); 
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    background-color: var(--card-bg);
+}
+
+.doa-card h4 {
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.arabic-text {
+    /* Pengaturan font dan arah untuk teks Arab */
+    font-family: 'Times New Roman', serif; 
+    font-size: 1.6em !important; /* Ukuran besar agar mudah dibaca */
+    text-align: right; 
+    direction: rtl; /* PENTING: Untuk memastikan tulisan Arab benar dari kanan ke kiri */
+    line-height: 2.2;
+    font-weight: 500;
+    color: #2c3e50; 
+    border-bottom: 1px dotted #ccc;
+    padding-bottom: 5px;
+    margin: 15px 0 5px 0;
+}
+
+.latin-text {
+    font-style: italic;
+    color: #34495e;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+.arti-text {
+    font-size: 0.95em;
+    color: #555;
+    /* Memberi pemisah visual untuk arti */
+    border-top: 1px dashed #ddd;
+    padding-top: 10px;
+}
+
+
+
 /* --- Styling Kartu Waktu Sholat --- */
 .prayer-time-card {
     grid-column: span 1; /* Atur lebar kartu agar sama dengan kartu jam */
@@ -770,8 +897,10 @@
         <i class="fas fa-clock"></i> Waktu Sekarang
     </div>
     
-    <h3 id="currentDate" class="date-display">senin, 29 september  2025</h3>
-                
+    <p class="current-date" id="currentDateDisplay">Memuat Tanggal...</p>
+
+    
+
     <div class="clock">
         <div class="container-clock">
             <h2 id="hour">00</h2>
@@ -832,20 +961,11 @@
 
 
     
-<div class="card streak-status-card">
-    <div class="card-header">
-        <i class="fas fa-fire"></i> Streak Istiqomah
-    </div>
-    <div class="score-display">
-        <h2 id="currentStreakDisplay">0</h2>
-        <p>Hari Berturut-turut</p>
-    </div>
-</div>   
-       
+
        
                 
-                
-                <li onclick="showSection('home')"><i class="fas fa-home"></i> Beranda</li>
+                <li onclick="showSection('qibla-section')"><i class="fas fa-kaaba"></i> Kompas Kiblat</li>
+            <li onclick="showSection('home')"><i class="fas fa-home"></i> Beranda</li>
                 <li onclick="showSection('stats')"><i class="fas fa-chart-bar"></i> Statistik</li>
                 <li onclick="showSection('chart')"><i class="fas fa-chart-line"></i> Grafik</li>
                 <li onclick="showSection('table')"><i class="fas fa-table"></i> Tabel Data</li>
@@ -855,6 +975,7 @@
                 <li onclick="showSection('forum')"><i class="fas fa-comments"></i> Forum Remaja</li>
                 <li onclick="showSection('achievements')"><i class="fas fa-trophy"></i> Pencapaian</li>
                 <li onclick="showSection('tips')"><i class="fas fa-lightbulb"></i> Trik & Tips</li>
+                <li onclick="showSection('doa-bacaan')"><i class="fas fa-pray"></i> Doa Harian & Bacaan</li>
                 <li onclick="showSection('doa')"><i class="fas fa-pray"></i> Doa & Bacaan</li>
                 <li onclick="showSection('gerakan-sholat')"><i class="fas fa-mosque"></i> Gerakan Sholat</li>
                 <li onclick="showSection('wudhu')"><i class="fas fa-hand-holding-water"></i> Wudhu</li>
@@ -862,6 +983,7 @@
                 <li onclick="showSection('profile')"><i class="fas fa-user-circle"></i> Profil</li>
                 <li onclick="showSection('web')"><i class="fas fa-globe"></i> Web</li>
                 <li onclick="showSection('leaderboard')"><i class="fas fa-trophy"></i> Leaderboard Poin</li>
+                <li onclick="showSection('quote-section')"><i class="fas fa-feather-alt"></i> Inspirasi Harian</li>
             </ul>
         </nav>
 
@@ -877,17 +999,24 @@
             <p id="no-results" style="display: none;">Tidak ada hasil yang ditemukan.</p>
         </ul>
             <div class="container">
-                </section><section id="search-results-section" style="display: none;">
+                </section>
+                <section id="search-results-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <div class="gcse-searchresults-only"></div>
                 </section>
 
-</section><section id="home-section" style="display: block;">
+<section id="home-section" style="display: block;">
     <h2>Selamat Datang di Aksara</h2>
     <p style="text-align: center;">Aksara ini menyajikan data hipotetis mengenai tren penurunan ibadah di kalangan remaja. Data ini bersifat edukatif dan terinspirasi dari riset global. Gunakan navigasi di samping untuk menjelajahi statistik, trik, doa, dan hadis.</p>
     
     
-    
+    <div class="container card quote-card" style="margin-top: 20px;">
+    <h3><i class="fas fa-quote-left"></i> Kutipan Istiqomah Hari Ini</h3>
+    <p id="dailyQuoteText" style="font-style: italic; font-size: 1.1em; text-align: center;">"Memuat kutipan inspiratif..."</p>
+    <p id="quoteSource" style="text-align: right; font-weight: bold; color: var(--primary-color); margin-top: 10px;">— Sumber</p>
+</div>
+
+
     
     <div class="container" style="margin-top: 20px; border-left: 5px solid #27ae60;">
         <h3><i class="fas fa-book-open"></i> Hadis Harian</h3>
@@ -911,6 +1040,10 @@
         <h3 style="color: #2ecc71; margin-bottom: 5px;"><i class="fas fa-medal"></i> Tantangan Sunnah Minggu Ini!</h3>
         <p id="sunnah-challenge" style="font-weight: bold; font-size: 1.1em; color: #34495e;">Memuat Tantangan...</p>
         <p style="font-size: 0.9em; color: #7f8c8d;">(Tantangan diperbarui setiap hari Senin)</p>
+        
+        
+        
+        
     </div>
     <div class="container" style="margin-top: 20px;">
         <h3><i class="fas fa-bullhorn"></i> Informasi Terbaru</h3>
@@ -921,7 +1054,7 @@
         </ul>
     </div>
 </section>
-</section><section id="stats-section" style="display: none;">
+<section id="stats-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2>Statistik Penurunan Ibadah</h2>
                     <div class="stats">
@@ -953,7 +1086,8 @@
 
                 
           
-                </section><section id="chart-section" style="display: none;">
+                </section>
+                <section id="chart-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2>Grafik Tren Penurunan</h2>
                     <div class="controls">
@@ -969,7 +1103,8 @@
                     </div>
                 </section>
          
-                </section><section id="table-section" style="display: none;">
+                </section>
+                <section id="table-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2>Tabel Data Detail</h2>
                     <table id="dataTable">
@@ -987,7 +1122,8 @@
                     </table>
                 </section>
          
-                </section><section id="checklist-section" style="display: none;">
+                </section>
+                <section id="checklist-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2>Checklist Sholat Fardhu 40 Hari</h2>
                     <p style="text-align: center;">Tantang dirimu untuk sholat 5 waktu selama 40 hari tanpa terlewat. Ini adalah langkah awal yang luar biasa untuk menguatkan ibadahmu. </p>
@@ -1033,7 +1169,8 @@
                 </section>
         </ul>
            
-                </section><section id="journal-section" style="display: none;">
+                </section>
+                <section id="journal-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2><i class="fas fa-book"></i> Jurnal Ibadah Harian</h2>
                     <p style="text-align: center;">Catat ibadahmu hari ini dan dapatkan poin!</p>
@@ -1062,7 +1199,7 @@
                     </div>
                 </section>
 
-                </section><section id="quiz-section" style="display: none;">
+                <section id="quiz-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2><i class="fas fa-question-circle"></i> Kuis Harian</h2>
                     <p style="text-align: center;">Uji pengetahuanmu dan dapatkan poin tambahan!</p>
@@ -1071,7 +1208,7 @@
                     </div>
                 </section>
 
-                </section><section id="forum-section" style="display: none;">
+                <section id="forum-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2><i class="fas fa-comments"></i> Forum Remaja</h2>
                     <p style="text-align: center;">Tempat berbagi, bertanya, dan saling menyemangati. Fitur ini adalah simulasi dari forum komunitas.</p>
@@ -1110,7 +1247,9 @@
                     </div>
                 </section>
       
-                </section><section id="achievements-section" style="display: none;">
+      
+           </section>
+                <section id="achievements-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')" aria-label="Kembali ke Beranda">
                         <i class="fas fa-arrow-left"></i> Kembali
                     </button>
@@ -1152,7 +1291,9 @@
                     </div>
                 </section>
     
-               </section> <section id="leaderboard-section" style="display: none;">
+    
+             </section>
+                <section id="leaderboard-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2><i class="fas fa-trophy"></i> Leaderboard Poin Ibadah</h2>
                     <p style="text-align: center;">Kumpulkan poin untuk masuk ke daftar top 5! Poin didapat dari Jurnal Ibadah dan Kuis Harian.</p>
@@ -1174,8 +1315,12 @@
                     </div>
                 </section>
         
+                        
+              <section id="doa-bacaan" class="content-section" style="display: none;">
+                  </section>
+
           
-               </section><section id="tips-section" style="display: none;">
+               <section id="tips-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2>Trik dan Tips Agar Semangat Ibadah</h2>
                     <div class="list-item">
@@ -1193,10 +1338,16 @@
                     <div class="list-item">
                         <h4>4. Temukan Makna di Balik Ibadah</h4>
                         <p>Pahami tujuan dari setiap ibadah. Salat bukan hanya gerakan, tapi sarana untuk berkomunikasi dengan Tuhan dan mencari ketenangan.</p>
+                                            </div>
+                    <div class="list-item">
+                        <h4>4. Temukan Makna di Balik Ibadah</h4>
+                        <p>Pahami tujuan dari setiap ibadah. Salat bukan hanya gerakan, tapi sarana untuk berkomunikasi dengan Tuhan dan mencari ketenangan.</p>
                     </div>
-                </section>
-         
-                </section><section id="doa-section" style="display: none;">
+                    </section>
+
+
+</section>
+<section id="doa-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2>Doa dan Bacaan Lengkap Sholat</h2>
                     <div class="list-item">
@@ -1460,7 +1611,33 @@
                     </div>
                 </section>
               
-                </section><section id="profile-section" style="display: none;">
+
+ </section>
+<section id="doa-bacaan" style="display: none;">
+    <button class="back-button" onclick="showSection('home')"><i class
+    ="fas fa-arrow-left"></i> Kembali</button>
+    <h2><i class="fas fa-pray"></i> Doa Harian & Bacaan Penting</h2>
+    <p style="text-align: center;">Kumpulan doa singkat dan bacaan penting yang bisa diamalkan setiap hari.</p>
+
+    <div class="container card doa-card">
+        <h4><i class="fas fa-sun"></i> Doa Bangun Tidur</h4>
+        <p class="arabic-text" style="font-size: 1.5em; margin: 10px 0;">اَلْحَمْدُ لِلّٰهِ الَّذِيْ أَحْيَانَا بَعْدَمَا أَمَاتَنَا وَإِلَيْهِ النُّشُوْرُ</p>
+        <p class="latin-text">Alhamdu lillahil-ladzii ahyaanaa ba'da maa amaatanaa wa ilaihin-nusyuur.</p>
+        <p class="arti-text">Artinya: "Segala puji bagi Allah, yang telah menghidupkan kami setelah mematikan kami, dan kepada-Nyalah kami kembali."</p>
+    </div>
+
+    <div class="container card doa-card">
+        <h4><i class="fas fa-utensils"></i> Doa Sebelum Makan</h4>
+        <p class="arabic-text" style="font-size: 1.5em; margin: 10px 0;">اَللّٰهُمَّ بَارِكْ لَنَا فِيْمَا رَزَقْتَنَا وَقِنَا عَذَابَ النَّارِ</p>
+        <p class="latin-text">Allaahumma baarik lanaa fiimaa razaqtanaa wa qinaa 'adzaaban naar.</p>
+        <p class="arti-text">Artinya: "Ya Allah, berkahilah rezeki yang Engkau berikan kepada kami, dan peliharalah kami dari siksa api neraka."</p>
+    </div>
+</section>
+
+                
+                
+                
+                <section id="profile-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2>Profil Pengguna</h2>
                     <div style="text-align: center;">
@@ -1471,14 +1648,37 @@
                         <input id="file-upload" type="file" onchange="previewImage(event)"/>
                         <h3>Nama Pengguna: Remaja Istiqomah</h3>
                         <p>Poin Ibadah Total: <strong id="profile-points">0</strong> Poin</p>
+                        </div>
+                </section>
+                        <section id="qibla-section" class="content-section" style="display: none;">
+    <button class="back-button" onclick="showSection('home-section')"><i class="fas fa-arrow-left"></i> Kembali</button>
+    <h2><i class="fas fa-kaaba"></i> Arah Kiblat</h2>
+    <p>Pastikan Anda mengizinkan akses lokasi pada browser Anda untuk hasil yang akurat.</p>
+
+    <div class="container card qibla-card">
+        <h4 id="qibla-status">Memuat Lokasi...</h4>
+        <div class="compass-container">
+            <img src="https://i.imgur.com/v8tT9oX.png" alt="Kompas Dasar" class="compass-base">
+            
+            <img src="https://i.imgur.com/K3t5zLp.png" alt="Jarum Kiblat" class="qibla-needle" id="qibla-needle">
+        </div>
+        <p>Arah Kiblat (Derajat dari Utara): <strong id="qibla-degree">--°</strong></p>
+    </div>
+    
+    <p style="font-size: 0.8em; color: #777; margin-top: 15px;">*Akurasi bergantung pada kualitas sinyal GPS dan sensor perangkat Anda.</p>
+</section>
+
+                        
                     </div>
                 </section>
    
 
 
+
+
                 
-         
-                </section><section id="web-section" style="display: none;">
+         </section>
+                <section id="web-section" style="display: none;">
                     <button class="back-button" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2>Link Web Islami Pilihan</h2>
                     <div class="list-item">
@@ -1496,7 +1696,10 @@
                         <li><i class="fas fa-link"></i> <a href="https://www.pewresearch.org/" target="_blank">Pew Research Center</a><p>Lembaga riset yang sering menerbitkan survei tentang agama dan kehidupan sosial di berbagai negara.</p></li>
                         <li><i class="fas fa-link"></i> <a href="https://www.bps.go.id/" target="_blank">Badan Pusat Statistik (BPS) Indonesia</a><p>Sumber data resmi pemerintah Indonesia untuk demografi dan statistik sosial.</p></li>
                         <li><i class="fas fa-link"></i> <a href="https://www.unicef.org/indonesia" target="_blank">UNICEF Indonesia</a><p>Informasi dan laporan tentang kesejahteraan, pendidikan, dan kesehatan anak dan remaja di Indonesia.</p></li>
-                    </ul>
+                    
+        </div>
+
+                        </ul>
                 </section>
 
             </div>
@@ -1504,6 +1707,260 @@
     </div>
     
     <script>
+                        
+
+
+   
+       // =======================================================
+// FUNGSI UNTUK MENGUPDATE TANGGAL OTOMATIS
+// =======================================================
+function updateDate() {
+    const dateDisplay = document.getElementById('currentDateDisplay');
+    
+    // Pastikan elemen ditemukan sebelum dilanjutkan
+    if (!dateDisplay) return; 
+
+    const now = new Date();
+    
+    // Opsi untuk format tanggal
+    const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    };
+    
+    // Menggunakan locale 'id-ID' untuk mendapatkan nama hari dan bulan dalam bahasa Indonesia
+    const formattedDate = now.toLocaleDateString('id-ID', options);
+    
+    // Perbarui teks di HTML
+    dateDisplay.textContent = formattedDate;
+}
+ 
+ 
+// =======================================================
+// DATA KUTIPAN INSPIRATIF
+// =======================================================
+const inspirationalQuotes = [
+    {
+        quote: "Amalan yang paling dicintai oleh Allah adalah amalan yang kontinyu (berkelanjutan) meskipun sedikit.",
+        source: "Hadis Riwayat Bukhari dan Muslim"
+    },
+    {
+        quote: "Bukan kesulitan yang membuat kita takut, tapi ketakutan yang membuat kita sulit. Jangan pernah menyerah.",
+        source: "Sayyidina Ali bin Abi Thalib"
+    },
+    {
+        quote: "Istiqomah adalah saat kamu memilih untuk tetap berjalan di jalan yang benar, meskipun kamu tidak melihat siapa pun berjalan bersamamu.",
+        source: "Anonim"
+    },
+    {
+        quote: "Jangan pernah meremehkan perbuatan baik sekecil apapun, bahkan tersenyum kepada saudaramu.",
+        source: "Hadis"
+    },
+    {
+        quote: "Hidup ini sangat singkat. Jangan sibuk dengan urusan duniawi sampai melupakan akhirat.",
+        source: "Imam Syafi'i"
+    }
+];
+
+// =======================================================
+// FUNGSI MENAMPILKAN KUTIPAN ACAK
+// =======================================================
+function displayRandomQuote() {
+    const quoteEl = document.getElementById('dailyQuoteText');
+    const sourceEl = document.getElementById('quoteSource');
+
+    if (quoteEl && sourceEl) {
+        // Ambil indeks acak
+        const randomIndex = Math.floor(Math.random() * inspirationalQuotes.length);
+        const randomQuote = inspirationalQuotes[randomIndex];
+
+        // Tampilkan kutipan dengan format yang rapi
+        quoteEl.textContent = `“${randomQuote.quote}”`;
+        sourceEl.textContent = `— ${randomQuote.source}`;
+    }
+}
+
+
+ 
+
+// =======================================================
+// FUNGSI PENGATUR HALAMAN (SHOWSECTION)
+// FUNGSI INI WAJIB ADA AGAR TOMBOL MENU BEKERJA
+// =======================================================
+function showSection(sectionId) {
+    // 1. Sembunyikan semua section yang ada
+    document.querySelectorAll('section').forEach(section => {
+        section.style.display = 'none';
+        section.classList.remove('active');
+    });
+
+    // 2. Tampilkan section yang diminta
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.style.display = 'block';
+        targetSection.classList.add('active');
+        
+        // Reset scroll ke atas
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.scrollTop = 0;
+        }
+
+        // Panggil fungsi inisialisasi fitur (jika ada)
+        if (sectionId === 'doa-bacaan') {
+            console.log('Halaman Doa Harian dimuat!');
+        }
+       if (sectionId === 'qibla-section') {
+    findQibla(); // Panggil fungsi untuk menghitung dan memutar kompas
+} 
+    
+    }
+}
+
+
+
+
+
+
+// =======================================================
+// FUNGSI PENDUKUNG (ADDPOINTS, UPDATE DATE)
+// =======================================================
+function addPoints(points) {
+    const DAILY_SCORE_KEY = 'istiqomah_daily_score';
+    const currentScore = parseInt(localStorage.getItem(DAILY_SCORE_KEY) || 0);
+    const newScore = currentScore + points;
+    localStorage.setItem(DAILY_SCORE_KEY, newScore);
+    if (typeof updateScoreDisplay === 'function') {
+        updateScoreDisplay(newScore);
+    }
+}
+
+function updateDate() {
+    const dateDisplay = document.getElementById('currentDateDisplay');
+    if (!dateDisplay) return; 
+
+    const now = new Date();
+    const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    };
+    const formattedDate = now.toLocaleDateString('id-ID', options);
+    dateDisplay.textContent = formattedDate;
+}
+
+
+// =======================================================
+// INISIALISASI SAAT HALAMAN DIMUAT
+// =======================================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Tampilkan halaman Beranda (home-section) saat pertama kali dimuat
+    try {
+        // PENTING: Gunakan ID yang benar untuk Beranda Anda (home-section atau home)
+        showSection('home-section'); 
+        updateDate(); // Panggil fungsi update tanggal
+    } catch (error) {
+        console.error("Aplikasi gagal inisialisasi:", error);
+    }
+    
+    // Tempatkan semua kode inisialisasi lain di sini
+});
+
+    
+    
+ // =======================================================
+// KONSTANTA DAN FUNGSI KOMPAS KIBLAT
+// =======================================================
+
+// Koordinat Ka'bah, Mekkah (digunakan untuk perhitungan)
+const KAABA_LAT = 21.4225;
+const KAABA_LON = 39.8262;
+
+/**
+ * Mengkonversi sudut dari radian ke derajat.
+ */
+function toDegrees(radians) {
+    return radians * (180 / Math.PI);
+}
+
+/**
+ * Mengkonversi sudut dari derajat ke radian.
+ */
+function toRadians(degrees) {
+    return degrees * (Math.PI / 180);
+}
+
+/**
+ * Fungsi utama untuk menghitung arah Kiblat.
+ */
+function calculateQibla(userLat, userLon) {
+    const latK = toRadians(KAABA_LAT); // Lintang Ka'bah
+    const lonK = toRadians(KAABA_LON); // Bujur Ka'bah
+    const latU = toRadians(userLat);   // Lintang Pengguna
+    const lonU = toRadians(userLon);   // Bujur Pengguna
+
+    // Perhitungan menggunakan rumus bola besar (Great Circle Bearing)
+    const y = Math.sin(lonK - lonU);
+    const x = Math.cos(latU) * Math.tan(latK) - Math.sin(latU) * Math.cos(lonK - lonU);
+    
+    // Hasil bearing dalam radian, lalu konversi ke derajat
+    let bearing = toDegrees(Math.atan2(y, x));
+
+    // Pastikan hasilnya antara 0 dan 360 derajat (dari Utara)
+    if (bearing < 0) {
+        bearing += 360;
+    }
+
+    return bearing;
+}
+
+/**
+ * Menggunakan Geolocation API untuk mendapatkan lokasi dan menampilkan Kiblat.
+ */
+function findQibla() {
+    const statusEl = document.getElementById('qibla-status');
+    const degreeEl = document.getElementById('qibla-degree');
+    const needleEl = document.getElementById('qibla-needle');
+
+    if (navigator.geolocation) {
+        statusEl.textContent = "Mencari lokasi Anda...";
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const userLat = position.coords.latitude;
+                const userLon = position.coords.longitude;
+                
+                // Hitung arah Kiblat
+                const qiblaDirection = calculateQibla(userLat, userLon);
+                
+                // Tampilkan hasil
+                statusEl.textContent = "Kiblat Ditemukan!";
+                degreeEl.textContent = `${qiblaDirection.toFixed(2)}°`;
+                
+                // Putar jarum kompas menggunakan CSS Transform
+                if (needleEl) {
+                    needleEl.style.transform = `rotate(${qiblaDirection}deg)`;
+                }
+            },
+            (error) => {
+                // Tangani error jika pengguna menolak atau GPS mati
+                statusEl.textContent = "Gagal Akses Lokasi (Izin Ditolak atau GPS Mati).";
+                degreeEl.textContent = "--";
+                console.error("Geolocation error:", error);
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        );
+    } else {
+        statusEl.textContent = "Geolocation tidak didukung oleh browser Anda.";
+        degreeEl.textContent = "N/A";
+    }
+}
+   
+
+    
     
 // =======================================================
 // FUNGSI BARU UNTUK SISTEM POIN HARIAN (GANTI FUNGSI LAMA)
@@ -1916,6 +2373,39 @@ async function fetchPrayerTimes() {
 
 
 
+// =======================================================
+// FUNGSI MENAMPILKAN SEMUA KUTIPAN DI HALAMAN KHUSUS
+// =======================================================
+function populateQuoteSection() {
+    const container = document.getElementById('allQuotesContainer');
+    if (!container) return;
+
+    // Kosongkan container sebelum mengisi ulang
+    container.innerHTML = ''; 
+
+    // Ambil data kutipan yang sudah ada
+    inspirationalQuotes.forEach(item => {
+        const quoteItem = document.createElement('div');
+        // Gunakan class baru untuk styling
+        quoteItem.classList.add('container', 'quote-list-item');
+        
+        // 1. Kutipan
+        const quoteText = document.createElement('p');
+        quoteText.classList.add('list-quote-text');
+        quoteText.textContent = `"${item.quote}"`;
+
+        // 2. Sumber
+        const quoteSource = document.createElement('p');
+        quoteSource.classList.add('list-quote-source');
+        quoteSource.textContent = `— ${item.source}`;
+        
+        quoteItem.appendChild(quoteText);
+        quoteItem.appendChild(quoteSource);
+        container.appendChild(quoteItem);
+    });
+}
+
+
 
 // Panggil fungsi utama saat halaman dimuat
 document.addEventListener('DOMContentLoaded', () => {
@@ -1946,7 +2436,6 @@ function clock() {
 
     // Cek apakah elemen jam ada di halaman aktif.
     if (!hour) return; 
-
     let date = new Date();
     let h = date.getHours(); // Langsung ambil jam 24 jam
     let m = date.getMinutes();
@@ -1969,6 +2458,21 @@ function clock() {
 // Panggilan setInterval tetap sama:
 var interval = setInterval(clock, 1000); 
 // =======================================================
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    // ... kode yang sudah ada ...
+    
+    // Panggil fungsi untuk menampilkan tanggal saat load
+    updateDate(); 
+
+    // Panggil fungsi showSection untuk menampilkan Beranda
+    try {
+        showSection('home-section'); 
+    } catch (error) {
+        console.error("Gagal menampilkan section awal:", error);
+    }
+});
 
 
 
@@ -2959,6 +3463,30 @@ function updateNextPrayerFromFiktif(fiktifTimes) {
             } else if (profilePicEl) {
                  profilePicEl.src = "https://via.placeholder.com/100?text=Profile";
             }
+            
+            // ...
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Tampilkan halaman Beranda saat pertama kali dimuat
+    try {
+        showSection('home-section'); 
+    } catch (error) {
+        console.error("Gagal menampilkan section awal:", error);
+    }
+    
+    // 2. Update Tanggal dan Jam secara berkala
+    updateDate(); 
+    setInterval(updateDate, 1000); 
+
+    // 3. Muat skor harian saat ini
+    updateScoreDisplay(parseInt(localStorage.getItem('istiqomah_daily_score') || 0));
+
+    // 4. Panggil fungsi untuk menampilkan kutipan harian (BARU DITAMBAHKAN)
+    displayRandomQuote(); 
+    
+    // ... kode inisialisasi lainnya
+});
+
+            
 
             // Inisialisasi Data & UI
             loadUserPoints();
@@ -2973,6 +3501,7 @@ function updateNextPrayerFromFiktif(fiktifTimes) {
             setWeeklyChallenge();
             loadLocation(); 
             updatePrayerNotification(); 
+            displayRandomQuote();
 
             // Set interval untuk mengecek waktu sholat setiap menit
             setInterval(updatePrayerNotification, 60000);
